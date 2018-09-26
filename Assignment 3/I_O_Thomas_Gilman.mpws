@@ -1,0 +1,1362 @@
+1.)
+%uasm65,title="reflect switches to LEDs"
+
+    org 0200h
+    
+main:
+    lda 0a600h ;load switch data
+    eor #11111111b ;ports on teensy are idle HIGH
+    sta 0a200h ;put in led memory location
+    
+    jmp main
+    
+    end
+
+%/uasm65
+
+    %output,mpversion=".251",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S10E0200AD00A6493F8D00A24C000297
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0200            000002 |    org 0200h
+                      000003 |    
+      0200            000004 |main:
+      0200 AD 00 A6   000005 |    lda 0a600h ;load switch data
+      0203 49 3F      000006 |    eor #111111b ;ports on teensy are idle HIGH
+      0205 8D 00 A2   000007 |    sta 0a200h ;put in led memory location
+                      000008 |    
+      0208 4C 00 02   000009 |    jmp main
+                      000010 |    
+                      000011 |    end
+      
+      *** Symbol Table ***
+      {MAIN=512, =0}
+.   %/output
+
+2.)
+%uasm65,title="print HEX of switch status to IO"
+;************************************************************
+;              Monitor Utility Subroutine Jump Table.
+;************************************************************
+OutChar:  equ E003h ;Output byte in A register to serial port.
+
+GetChar:  equ E006h ;Get a byte from the serial port.
+
+GetCharW: equ E009h ;Wait and get a byte from the serial port.
+
+PrntMess: equ E00Ch ;Print a message to the serial port.
+
+OutSpace: equ E00Fh ;Output spaces to the serial port.
+
+OutHex:   equ E012h ;Output a HEX number to the serial port.
+
+DgtToBin: equ E015h ;Convert an ASCII digit into binary.
+
+GetLine:  equ E018h ;Input a line from the serial port.
+
+
+    org 0200h
+    
+main:
+    lda 0a600h
+    eor #11111111b ;because ports idle HIGH
+    jsr OutHex
+    jsr Delay
+    jmp main
+    
+    end
+    
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0ffh
+	
+InLoop1:
+	ldy #0ffh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+
+%/uasm65
+
+    %output,mpversion=".251",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200AD00A6493F2012E0200E024C0002488A489848A9D8
+      	S117021401A2FFA0FF88D0FDCAD0F838E901D0F168A868AAA5
+      	S1050228686008
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |;************************************************************
+                      000002 |;              Monitor Utility Subroutine Jump Table.
+                      000003 |;************************************************************
+      0000            000004 |OutChar:  equ E003h ;Output byte in A register to serial port.
+                      000005 |
+      0000            000006 |GetChar:  equ E006h ;Get a byte from the serial port.
+                      000007 |
+      0000            000008 |GetCharW: equ E009h ;Wait and get a byte from the serial port.
+                      000009 |
+      0000            000010 |PrntMess: equ E00Ch ;Print a message to the serial port.
+                      000011 |
+      0000            000012 |OutSpace: equ E00Fh ;Output spaces to the serial port.
+                      000013 |
+      0000            000014 |OutHex:   equ E012h ;Output a HEX number to the serial port.
+                      000015 |
+      0000            000016 |DgtToBin: equ E015h ;Convert an ASCII digit into binary.
+                      000017 |
+      0000            000018 |GetLine:  equ E018h ;Input a line from the serial port.
+                      000019 |
+                      000020 |
+      0200            000021 |    org 0200h
+                      000022 |    
+      0200            000023 |main:
+      0200 AD 00 A6   000024 |    lda 0a600h
+      0203 49 3F      000025 |    eor #111111b ;because ports idle HIGH
+      0205 20 12 E0   000026 |    jsr OutHex
+      0208 20 0E 02   000027 |    jsr Delay
+      020B 4C 00 02   000028 |    jmp main
+                      000029 |    
+                      000030 |    end
+                      000031 |    
+      020E            000032 |Delay:
+                      000033 |;Save registers on the stack.
+      020E 48         000034 |	pha
+      020F 8A         000035 |	txa
+      0210 48         000036 |	pha
+      0211 98         000037 |	tya
+      0212 48         000038 |	pha
+                      000039 |	
+                      000040 |;Change the number that is being loaded into the
+                      000041 |; 'A' register in order to change the delay time.
+      0213 A9 01      000042 |	lda #01h
+                      000043 |	
+      0215            000044 |OutLoop:
+      0215 A2 FF      000045 |	ldx #0ffh
+                      000046 |	
+      0217            000047 |InLoop1:
+      0217 A0 FF      000048 |	ldy #0ffh
+                      000049 |	
+      0219            000050 |InLoop2:
+      0219 88         000051 |	dey
+      021A D0 FD      000052 |	bne InLoop2
+                      000053 |	
+      021C CA         000054 |	dex
+      021D D0 F8      000055 |	bne InLoop1
+                      000056 |	
+      021F 38         000057 |	sec
+      0220 E9 01      000058 |	sbc #1d
+      0222 D0 F1      000059 |	bne OutLoop
+                      000060 |	
+                      000061 |;Restore registers from the stack.
+      0224 68         000062 |	pla
+      0225 A8         000063 |	tay
+      0226 68         000064 |	pla
+      0227 AA         000065 |	tax
+      0228 68         000066 |	pla
+                      000067 |
+      0229 60         000068 |	rts
+      
+      *** Symbol Table ***
+      {PRNTMESS=57356, DELAY=526, MAIN=512, GETLINE=57368, GETCHAR=57350, OUTSPACE=57359, INLOOP2=537, OUTCHAR=57347, INLOOP1=535, DGTTOBIN=57365, GETCHARW=57353, OUTHEX=57362, OUTLOOP=533, =0}
+.   %/output
+
+3.)
+%uasm65,title="Alphabet backwards ranging switch speed"
+;************************************************************
+;              Monitor Utility Subroutine Jump Table.
+;************************************************************
+OutChar:  equ E003h ;Output byte in A register to serial port.
+
+GetChar:  equ E006h ;Get a byte from the serial port.
+
+GetCharW: equ E009h ;Wait and get a byte from the serial port.
+
+PrntMess: equ E00Ch ;Print a message to the serial port.
+
+OutSpace: equ E00Fh ;Output spaces to the serial port.
+
+OutHex:   equ E012h ;Output a HEX number to the serial port.
+
+DgtToBin: equ E015h ;Convert an ASCII digit into binary.
+
+GetLine:  equ E018h ;Input a line from the serial port.
+
+    org 0200h
+    
+main:
+    lda 0a600h
+    eor #11111111b ;the switches on the teensy idle HIGH
+    and #1111b
+    cmp #1b
+    beq DecDelay ;if lsb is toggled decrease delay time
+    cmp #1000b
+    beq IncDelay ;if msb is toggled increase delay time
+    cmp #1111b
+    beq finish   ;if all switches are toggled exit program
+    lda AlphaChar
+    jsr OutChar
+    Dec AlphaChar
+    jsr Delay
+    cmp #65d
+    beq resetChar
+    jmp main
+    
+DecDelay:
+    lda XRegDelay
+    cmp #000h
+    beq main
+    dec XRegDelay
+    dec YRegDelay
+    jmp main
+    
+IncDelay:
+    lda XRegDelay
+    cmp #0ffh
+    beq main
+    inc XRegDelay
+    inc YRegDelay
+    jmp main
+
+resetChar:
+    lda #90d
+    sta AlphaChar
+    jmp main
+    
+AlphaChar:
+    dbt 90d
+
+XRegDelay:
+    dbt 0ffh
+
+YRegDelay:
+    dbt 0ffh
+    
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx XRegDelay
+	
+InLoop1:
+	ldy YRegDelay
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+finish:
+    end
+
+%/uasm65
+
+    %output,mpversion=".251",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200AD00A649FF290FC901F01BC908F027C90FF05CAD85
+      	S11702144E022003E0CE4E02205102C941F0234C0002AD4F87
+      	S117022802C900F0D3CE4F02CE50024C0002AD4F02C9FFF0ED
+      	S117023CC3EE4F02EE50024C0002A95A8D4E024C00025AFF93
+      	S1170250FF488A489848A901AE4F02AC500288D0FDCAD0F710
+      	S10E026438E901D0EF68A868AA6860C0
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |;************************************************************
+                      000002 |;              Monitor Utility Subroutine Jump Table.
+                      000003 |;************************************************************
+      0000            000004 |OutChar:  equ E003h ;Output byte in A register to serial port.
+                      000005 |
+      0000            000006 |GetChar:  equ E006h ;Get a byte from the serial port.
+                      000007 |
+      0000            000008 |GetCharW: equ E009h ;Wait and get a byte from the serial port.
+                      000009 |
+      0000            000010 |PrntMess: equ E00Ch ;Print a message to the serial port.
+                      000011 |
+      0000            000012 |OutSpace: equ E00Fh ;Output spaces to the serial port.
+                      000013 |
+      0000            000014 |OutHex:   equ E012h ;Output a HEX number to the serial port.
+                      000015 |
+      0000            000016 |DgtToBin: equ E015h ;Convert an ASCII digit into binary.
+                      000017 |
+      0000            000018 |GetLine:  equ E018h ;Input a line from the serial port.
+                      000019 |
+      0200            000020 |    org 0200h
+                      000021 |    
+      0200            000022 |main:
+      0200 AD 00 A6   000023 |    lda 0a600h
+      0203 49 FF      000024 |    eor #11111111b ;the switches on the teensy idle HIGH
+      0205 29 0F      000025 |    and #1111b
+      0207 C9 01      000026 |    cmp #1b
+      0209 F0 1B      000027 |    beq DecDelay ;if lsb is toggled decrease delay time
+      020B C9 08      000028 |    cmp #1000b
+      020D F0 27      000029 |    beq IncDelay ;if msb is toggled increase delay time
+      020F C9 0F      000030 |    cmp #1111b
+      0211 F0 5C      000031 |    beq finish   ;if all switches are toggled exit program
+      0213 AD 4E 02   000032 |    lda AlphaChar
+      0216 20 03 E0   000033 |    jsr OutChar
+      0219 CE 4E 02   000034 |    Dec AlphaChar
+      021C 20 51 02   000035 |    jsr Delay
+      021F C9 41      000036 |    cmp #65d
+      0221 F0 23      000037 |    beq resetChar
+      0223 4C 00 02   000038 |    jmp main
+                      000039 |    
+      0226            000040 |DecDelay:
+      0226 AD 4F 02   000041 |    lda XRegDelay
+      0229 C9 00      000042 |    cmp #000h
+      022B F0 D3      000043 |    beq main
+      022D CE 4F 02   000044 |    dec XRegDelay
+      0230 CE 50 02   000045 |    dec YRegDelay
+      0233 4C 00 02   000046 |    jmp main
+                      000047 |    
+      0236            000048 |IncDelay:
+      0236 AD 4F 02   000049 |    lda XRegDelay
+      0239 C9 FF      000050 |    cmp #0ffh
+      023B F0 C3      000051 |    beq main
+      023D EE 4F 02   000052 |    inc XRegDelay
+      0240 EE 50 02   000053 |    inc YRegDelay
+      0243 4C 00 02   000054 |    jmp main
+                      000055 |
+      0246            000056 |resetChar:
+      0246 A9 5A      000057 |    lda #90d
+      0248 8D 4E 02   000058 |    sta AlphaChar
+      024B 4C 00 02   000059 |    jmp main
+                      000060 |    
+      024E            000061 |AlphaChar:
+      024E 5A         000062 |    dbt 90d
+                      000063 |
+      024F            000064 |XRegDelay:
+      024F FF         000065 |    dbt 0ffh
+                      000066 |
+      0250            000067 |YRegDelay:
+      0250 FF         000068 |    dbt 0ffh
+                      000069 |    
+      0251            000070 |Delay:
+                      000071 |;Save registers on the stack.
+      0251 48         000072 |	pha
+      0252 8A         000073 |	txa
+      0253 48         000074 |	pha
+      0254 98         000075 |	tya
+      0255 48         000076 |	pha
+                      000077 |	
+                      000078 |;Change the number that is being loaded into the
+                      000079 |; 'A' register in order to change the delay time.
+      0256 A9 01      000080 |	lda #01h
+                      000081 |	
+      0258            000082 |OutLoop:
+      0258 AE 4F 02   000083 |	ldx XRegDelay
+                      000084 |	
+      025B            000085 |InLoop1:
+      025B AC 50 02   000086 |	ldy YRegDelay
+                      000087 |	
+      025E            000088 |InLoop2:
+      025E 88         000089 |	dey
+      025F D0 FD      000090 |	bne InLoop2
+                      000091 |	
+      0261 CA         000092 |	dex
+      0262 D0 F7      000093 |	bne InLoop1
+                      000094 |	
+      0264 38         000095 |	sec
+      0265 E9 01      000096 |	sbc #1d
+      0267 D0 EF      000097 |	bne OutLoop
+                      000098 |	
+                      000099 |;Restore registers from the stack.
+      0269 68         000100 |	pla
+      026A A8         000101 |	tay
+      026B 68         000102 |	pla
+      026C AA         000103 |	tax
+      026D 68         000104 |	pla
+                      000105 |
+      026E 60         000106 |	rts
+                      000107 |	
+      026F            000108 |finish:
+                      000109 |    end
+      
+      *** Symbol Table ***
+      {PRNTMESS=57356, GETCHAR=57350, INLOOP2=606, INLOOP1=603, OUTCHAR=57347, OUTLOOP=600, ALPHACHAR=590, DELAY=593, DECDELAY=550, OUTSPACE=57359, MAIN=512, FINISH=623, GETCHARW=57353, GETLINE=57368, RESETCHAR=582, YREGDELAY=592, DGTTOBIN=57365, XREGDELAY=591, OUTHEX=57362, INCDELAY=566, =0}
+.   %/output
+
+4.)
+%uasm65,title="outPut string on swtich press"
+
+PrntMess: equ E00Ch ;Print a message to the serial port.
+
+    org 0200h
+Main:
+	
+	lda 0a600h
+	eor #11111111b ;teensy switches idle high
+	and #00000001b
+	beq CkSw1
+	ldx #InMess1<
+	ldy #InMess1>
+	jsr PrntMess
+	jsr Delay
+	jmp CkSw1
+
+CkSw1:
+	lda 0a600h
+	eor #11111111b
+	and #00000010b
+	beq CkSw2
+	ldx #InMess2<
+	ldy #InMess2>
+	jsr PrntMess
+	jsr Delay
+	jmp CkSw2
+
+CkSw2:
+	lda 0a600h
+	eor #11111111b
+	and #00000100b
+	beq CkSw3
+	ldx #InMess3<
+	ldy #InMess3>
+	jsr PrntMess
+	jsr Delay
+	jmp CkSw3
+
+CkSw3:
+	lda 0a600h
+	eor #1111111b
+	and #0001000b
+	beq Main
+	brk
+	
+	
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0dfh
+	
+InLoop1:
+	ldy #0dfh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+;variables
+InMess1:
+	dbt 0ah,0dh
+	dbt "The front door is open"
+	dbt 0d
+	
+InMess2:
+	dbt 0ah,0dh
+	dbt "The mailbox is open"
+	dbt 0d
+
+InMess3:
+	dbt 0ah,0dh
+	dbt "The smoke alarm is on"
+	dbt 0d
+
+	end
+    
+
+%/uasm65
+
+    %output,mpversion=".251",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200AD00A649FF2901F00DA268A002200CE0204C024CB2
+      	S11702141602AD00A649FF2902F00DA281A002200CE0204CBA
+      	S1170228024C2C02AD00A649FF2904F00DA297A002200CE096
+      	S117023C204C024C4202AD00A6497F2908F0B500488A489809
+      	S117025048A901A2DFA0DF88D0FDCAD0F838E901D0F168A8CA
+      	S117026468AA68600A0D5468652066726F6E7420646F6F7253
+      	S1170278206973206F70656E000A0D546865206D61696C6243
+      	S117028C6F78206973206F70656E000A0D54686520736D6FFE
+      	S11202A06B6520616C61726D206973206F6E0055
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |PrntMess: equ E00Ch ;Print a message to the serial port.
+                      000003 |
+      0200            000004 |    org 0200h
+      0200            000005 |Main:
+                      000006 |	
+      0200 AD 00 A6   000007 |	lda 0a600h
+      0203 49 FF      000008 |	eor #11111111b ;teensy switches idle high
+      0205 29 01      000009 |	and #00000001b
+      0207 F0 0D      000010 |	beq CkSw1
+      0209 A2 68      000011 |	ldx #InMess1<
+      020B A0 02      000012 |	ldy #InMess1>
+      020D 20 0C E0   000013 |	jsr PrntMess
+      0210 20 4C 02   000014 |	jsr Delay
+      0213 4C 16 02   000015 |	jmp CkSw1
+                      000016 |
+      0216            000017 |CkSw1:
+      0216 AD 00 A6   000018 |	lda 0a600h
+      0219 49 FF      000019 |	eor #11111111b
+      021B 29 02      000020 |	and #00000010b
+      021D F0 0D      000021 |	beq CkSw2
+      021F A2 81      000022 |	ldx #InMess2<
+      0221 A0 02      000023 |	ldy #InMess2>
+      0223 20 0C E0   000024 |	jsr PrntMess
+      0226 20 4C 02   000025 |	jsr Delay
+      0229 4C 2C 02   000026 |	jmp CkSw2
+                      000027 |
+      022C            000028 |CkSw2:
+      022C AD 00 A6   000029 |	lda 0a600h
+      022F 49 FF      000030 |	eor #11111111b
+      0231 29 04      000031 |	and #00000100b
+      0233 F0 0D      000032 |	beq CkSw3
+      0235 A2 97      000033 |	ldx #InMess3<
+      0237 A0 02      000034 |	ldy #InMess3>
+      0239 20 0C E0   000035 |	jsr PrntMess
+      023C 20 4C 02   000036 |	jsr Delay
+      023F 4C 42 02   000037 |	jmp CkSw3
+                      000038 |
+      0242            000039 |CkSw3:
+      0242 AD 00 A6   000040 |	lda 0a600h
+      0245 49 7F      000041 |	eor #1111111b
+      0247 29 08      000042 |	and #0001000b
+      0249 F0 B5      000043 |	beq Main
+      024B 00         000044 |	brk
+                      000045 |	
+                      000046 |	
+      024C            000047 |Delay:
+                      000048 |;Save registers on the stack.
+      024C 48         000049 |	pha
+      024D 8A         000050 |	txa
+      024E 48         000051 |	pha
+      024F 98         000052 |	tya
+      0250 48         000053 |	pha
+                      000054 |	
+                      000055 |;Change the number that is being loaded into the
+                      000056 |; 'A' register in order to change the delay time.
+      0251 A9 01      000057 |	lda #01h
+                      000058 |	
+      0253            000059 |OutLoop:
+      0253 A2 DF      000060 |	ldx #0dfh
+                      000061 |	
+      0255            000062 |InLoop1:
+      0255 A0 DF      000063 |	ldy #0dfh
+                      000064 |	
+      0257            000065 |InLoop2:
+      0257 88         000066 |	dey
+      0258 D0 FD      000067 |	bne InLoop2
+                      000068 |	
+      025A CA         000069 |	dex
+      025B D0 F8      000070 |	bne InLoop1
+                      000071 |	
+      025D 38         000072 |	sec
+      025E E9 01      000073 |	sbc #1d
+      0260 D0 F1      000074 |	bne OutLoop
+                      000075 |	
+                      000076 |;Restore registers from the stack.
+      0262 68         000077 |	pla
+      0263 A8         000078 |	tay
+      0264 68         000079 |	pla
+      0265 AA         000080 |	tax
+      0266 68         000081 |	pla
+                      000082 |
+      0267 60         000083 |	rts
+                      000084 |	
+                      000085 |;variables
+      0268            000086 |InMess1:
+      0268 0A         000087 |	dbt 0ah,0dh
+      0269 0D               
+      026A 54         000088 |	dbt "The front door is open"
+      026B 68 65 20         
+      026E 66 72 6F         
+      0271 6E 74 20         
+      0274 64 6F 6F         
+      0277 72 20 69         
+      027A 73 20 6F         
+      027D 70 65 6E         
+      0280 00         000089 |	dbt 0d
+                      000090 |	
+      0281            000091 |InMess2:
+      0281 0A         000092 |	dbt 0ah,0dh
+      0282 0D               
+      0283 54         000093 |	dbt "The mailbox is open"
+      0284 68 65 20         
+      0287 6D 61 69         
+      028A 6C 62 6F         
+      028D 78 20 69         
+      0290 73 20 6F         
+      0293 70 65 6E         
+      0296 00         000094 |	dbt 0d
+                      000095 |
+      0297            000096 |InMess3:
+      0297 0A         000097 |	dbt 0ah,0dh
+      0298 0D               
+      0299 54         000098 |	dbt "The smoke alarm is on"
+      029A 68 65 20         
+      029D 73 6D 6F         
+      02A0 6B 65 20         
+      02A3 61 6C 61         
+      02A6 72 6D 20         
+      02A9 69 73 20         
+      02AC 6F 6E            
+      02AE 00         000099 |	dbt 0d
+                      000100 |
+                      000101 |	end
+      
+      *** Symbol Table ***
+      {PRNTMESS=57356, DELAY=588, CKSW3=578, CKSW2=556, MAIN=512, CKSW1=534, INLOOP2=599, INLOOP1=597, INMESS3=663, INMESS2=641, INMESS1=616, OUTLOOP=595, =0}
+.   %/output
+
+5.)
+%uasm65,title="Varying Delay 20Hz-30Hz"
+;get delays right adjusting the delays changes it to that Hz for both LED's
+
+    org 0200h
+    
+
+Main:
+    dec Led5Count
+    lda Led5Count
+    cmp #0d
+    beq ToggleLed5
+    dec Led6Count
+    lda Led6Count
+    cmp #0d
+    beq ToggleLed6
+    jmp Main
+
+ToggleLed6:
+    lda 0a200h
+    clc 
+    EOR #100000b
+    sta 0a200h
+    jsr delay
+    lda #73d
+    sta Led6Count
+    jmp main
+    
+ToggleLed5:
+    lda 0a200h
+    clc
+    EOR #10000b
+    sta 0a200h
+    jsr delay
+    lda #49d
+    sta Led5Count
+    jmp main
+
+Led6Count:
+    dbt 73d
+    
+Led5Count:
+    dbt 49d
+    
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+	lda #04h
+	
+OutLoop:
+	ldx #04h
+	
+InLoop1:
+	ldy #040h
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+
+finish:
+	end
+	
+%/uasm65
+
+    %output,mpversion=".251",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200CE4002AD4002C900F021CE3F02AD3F02C900F00354
+      	S11702144C0002AD00A21849208D00A2204102A9498D3F0262
+      	S11702284C0002AD00A21849108D00A2204102A9318D400275
+      	S117023C4C00024931488A489848A904A204A04088D0FDCA96
+      	S1100250D0F838E901D0F168A868AA686008
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |;get delays right adjusting the delays changes it to that Hz for both LED's
+                      000002 |
+      0200            000003 |    org 0200h
+                      000004 |    
+                      000005 |
+      0200            000006 |Main:
+      0200 CE 40 02   000007 |    dec Led5Count
+      0203 AD 40 02   000008 |    lda Led5Count
+      0206 C9 00      000009 |    cmp #0d
+      0208 F0 21      000010 |    beq ToggleLed5
+      020A CE 3F 02   000011 |    dec Led6Count
+      020D AD 3F 02   000012 |    lda Led6Count
+      0210 C9 00      000013 |    cmp #0d
+      0212 F0 03      000014 |    beq ToggleLed6
+      0214 4C 00 02   000015 |    jmp Main
+                      000016 |
+      0217            000017 |ToggleLed6:
+      0217 AD 00 A2   000018 |    lda 0a200h
+      021A 18         000019 |    clc 
+      021B 49 20      000020 |    EOR #100000b
+      021D 8D 00 A2   000021 |    sta 0a200h
+      0220 20 41 02   000022 |    jsr delay
+      0223 A9 49      000023 |    lda #73d
+      0225 8D 3F 02   000024 |    sta Led6Count
+      0228 4C 00 02   000025 |    jmp main
+                      000026 |    
+      022B            000027 |ToggleLed5:
+      022B AD 00 A2   000028 |    lda 0a200h
+      022E 18         000029 |    clc
+      022F 49 10      000030 |    EOR #10000b
+      0231 8D 00 A2   000031 |    sta 0a200h
+      0234 20 41 02   000032 |    jsr delay
+      0237 A9 31      000033 |    lda #49d
+      0239 8D 40 02   000034 |    sta Led5Count
+      023C 4C 00 02   000035 |    jmp main
+                      000036 |
+      023F            000037 |Led6Count:
+      023F 49         000038 |    dbt 73d
+                      000039 |    
+      0240            000040 |Led5Count:
+      0240 31         000041 |    dbt 49d
+                      000042 |    
+      0241            000043 |Delay:
+                      000044 |;Save registers on the stack.
+      0241 48         000045 |	pha
+      0242 8A         000046 |	txa
+      0243 48         000047 |	pha
+      0244 98         000048 |	tya
+      0245 48         000049 |	pha
+                      000050 |	
+      0246 A9 04      000051 |	lda #04h
+                      000052 |	
+      0248            000053 |OutLoop:
+      0248 A2 04      000054 |	ldx #04h
+                      000055 |	
+      024A            000056 |InLoop1:
+      024A A0 40      000057 |	ldy #040h
+                      000058 |	
+      024C            000059 |InLoop2:
+      024C 88         000060 |	dey
+      024D D0 FD      000061 |	bne InLoop2
+                      000062 |	
+      024F CA         000063 |	dex
+      0250 D0 F8      000064 |	bne InLoop1
+                      000065 |	
+      0252 38         000066 |	sec
+      0253 E9 01      000067 |	sbc #1d
+      0255 D0 F1      000068 |	bne OutLoop
+                      000069 |	
+                      000070 |;Restore registers from the stack.
+      0257 68         000071 |	pla
+      0258 A8         000072 |	tay
+      0259 68         000073 |	pla
+      025A AA         000074 |	tax
+      025B 68         000075 |	pla
+                      000076 |
+      025C 60         000077 |	rts
+                      000078 |
+      025D            000079 |finish:
+                      000080 |	end
+      
+      *** Symbol Table ***
+      {LED6COUNT=575, DELAY=577, MAIN=512, FINISH=605, INLOOP2=588, INLOOP1=586, LED5COUNT=576, TOGGLELED6=535, TOGGLELED5=555, OUTLOOP=584, =0}
+.   %/output
+6.)
+%uasm65,title="0E000h-0E010h output light pattern per sec"
+
+;************************************************************
+;              Monitor Utility Subroutine Jump Table.
+;************************************************************
+OutChar:  equ E003h ;Output byte in A register to serial port.
+
+GetChar:  equ E006h ;Get a byte from the serial port.
+
+GetCharW: equ E009h ;Wait and get a byte from the serial port.
+
+PrntMess: equ E00Ch ;Print a message to the serial port.
+
+OutSpace: equ E00Fh ;Output spaces to the serial port.
+
+OutHex:   equ E012h ;Output a HEX number to the serial port.
+
+DgtToBin: equ E015h ;Convert an ASCII digit into binary.
+
+GetLine:  equ E018h ;Input a line from the serial port.
+
+
+;Program entry.
+	org 0200h
+	
+	ldx #00d
+Main:
+	lda 0E000h,x
+	sta 0a200h
+	inx
+	cpx #10h
+	beq finish
+	jsr Delay
+	jmp main
+
+
+	
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #02h
+	
+OutLoop:
+	ldx #0dfh
+	
+InLoop1:
+	ldy #0dfh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	dex
+	bne InLoop1
+	sec
+	sbc #1d
+	bne OutLoop
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+start: dbt 0d
+
+finish:
+	end
+
+
+%/uasm65
+
+    %output,mpversion=".251",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A200BD00E08D00A2E8E010F0232013024C020248C0
+      	S11702148A489848A902A2DFA0DF88D0FDCAD0F838E901D09C
+      	S10B0228F168A868AA686000EF
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+                      000002 |;************************************************************
+                      000003 |;              Monitor Utility Subroutine Jump Table.
+                      000004 |;************************************************************
+      0000            000005 |OutChar:  equ E003h ;Output byte in A register to serial port.
+                      000006 |
+      0000            000007 |GetChar:  equ E006h ;Get a byte from the serial port.
+                      000008 |
+      0000            000009 |GetCharW: equ E009h ;Wait and get a byte from the serial port.
+                      000010 |
+      0000            000011 |PrntMess: equ E00Ch ;Print a message to the serial port.
+                      000012 |
+      0000            000013 |OutSpace: equ E00Fh ;Output spaces to the serial port.
+                      000014 |
+      0000            000015 |OutHex:   equ E012h ;Output a HEX number to the serial port.
+                      000016 |
+      0000            000017 |DgtToBin: equ E015h ;Convert an ASCII digit into binary.
+                      000018 |
+      0000            000019 |GetLine:  equ E018h ;Input a line from the serial port.
+                      000020 |
+                      000021 |
+                      000022 |;Program entry.
+      0200            000023 |	org 0200h
+                      000024 |	
+      0200 A2 00      000025 |	ldx #00d
+      0202            000026 |Main:
+      0202 BD 00 E0   000027 |	lda 0E000h,x
+      0205 8D 00 A2   000028 |	sta 0a200h
+      0208 E8         000029 |	inx
+      0209 E0 10      000030 |	cpx #10h
+      020B F0 23      000031 |	beq finish
+      020D 20 13 02   000032 |	jsr Delay
+      0210 4C 02 02   000033 |	jmp main
+                      000034 |
+                      000035 |
+                      000036 |	
+      0213            000037 |Delay:
+                      000038 |;Save registers on the stack.
+      0213 48         000039 |	pha
+      0214 8A         000040 |	txa
+      0215 48         000041 |	pha
+      0216 98         000042 |	tya
+      0217 48         000043 |	pha
+                      000044 |	
+                      000045 |;Change the number that is being loaded into the
+                      000046 |; 'A' register in order to change the delay time.
+      0218 A9 02      000047 |	lda #02h
+                      000048 |	
+      021A            000049 |OutLoop:
+      021A A2 DF      000050 |	ldx #0dfh
+                      000051 |	
+      021C            000052 |InLoop1:
+      021C A0 DF      000053 |	ldy #0dfh
+                      000054 |	
+      021E            000055 |InLoop2:
+      021E 88         000056 |	dey
+      021F D0 FD      000057 |	bne InLoop2
+      0221 CA         000058 |	dex
+      0222 D0 F8      000059 |	bne InLoop1
+      0224 38         000060 |	sec
+      0225 E9 01      000061 |	sbc #1d
+      0227 D0 F1      000062 |	bne OutLoop
+                      000063 |;Restore registers from the stack.
+      0229 68         000064 |	pla
+      022A A8         000065 |	tay
+      022B 68         000066 |	pla
+      022C AA         000067 |	tax
+      022D 68         000068 |	pla
+                      000069 |
+      022E 60         000070 |	rts
+                      000071 |	
+      022F 00         000072 |start: dbt 0d
+                      000073 |
+      0230            000074 |finish:
+                      000075 |	end
+      
+      *** Symbol Table ***
+      {PRNTMESS=57356, DELAY=531, MAIN=514, GETLINE=57368, GETCHAR=57350, OUTSPACE=57359, FINISH=560, INLOOP2=542, OUTCHAR=57347, INLOOP1=540, DGTTOBIN=57365, GETCHARW=57353, START=559, OUTHEX=57362, OUTLOOP=538, =0}
+.   %/output
+
+
+7.) 
+%uasm65,title="pingPong"
+;fix check paddle swing at msb and lsb before jumping to main or return swing
+;needs to dec a point if no swing at these points at end of each function loop
+    
+    org 0200h
+    
+main:
+    lda pongBall
+    sta 0a200h  ;load pingPongBall and pass it to LED's
+    jsr delay
+    lda 0a600h ;teensy switches idle high
+    eor #11111111b
+    and #1000b
+    cmp #1000b ;player2 press switch
+    beq checkSwingP2
+    clc
+    rol pongBall  ;move ball left 
+    lda pongBall
+    cmp #10000000b
+    bne main
+    beq checkSwingP2
+    
+returnBall:
+    lda pongBall
+    sta 0a200h
+    jsr delay
+    clc
+    ror pongBall
+    lda 0a600h ;teensy switches idle high
+    eor #11111111b
+    and #1b
+    cmp #1b
+    beq checkSwingP1
+    lda pongBall
+    cmp #1b
+    bne returnBall
+    beq checkSwingP1
+    jmp main
+    
+checkSwingP1:
+    lda pongBall
+    cmp #1b
+    bne decPlayer1
+    beq main
+    
+checkSwingP2:
+    lda pongBall
+    cmp #10000000b
+    bne decPlayer2
+    beq returnBall
+
+decPlayer1:
+    clc
+    ror player1Score
+    lda player1Score
+    cmp #0b
+    beq Ply2Win
+    ora player2Score
+    sta 0a200h
+    jsr delay
+    lda #1b
+    sta pongBall
+    jmp main
+    
+decPlayer2:
+    rol player2Score
+    lda player2Score
+    cmp #00000000b
+    beq Ply1Win
+    ora player1Score
+    sta 0a200h
+    jsr delay
+    lda #10000000b
+    sta pongBall
+    jmp returnBall
+    
+Ply1Win:
+    lda #1111b
+    sta 0a200h
+    jsr delay
+    brk
+    
+Ply2Win:
+    lda #11110000b
+    sta 0a200h
+    jsr delay
+    brk
+
+pongBall:
+    dbt 1b
+
+player1Score:
+    dbt 1111b
+
+player2Score:
+    dbt 11110000b
+
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0ffh
+	
+InLoop1:
+	ldy #0ffh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+	end
+
+%/uasm65
+
+    %output,mpversion=".251",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200ADA0028D00A220A302AD00A649FF2908C908F03ADC
+      	S1170214182EA002ADA002C980D0E1F02DADA0028D00A220E6
+      	S1170228A302186EA002AD00A649FF2901C901F00CADA00217
+      	S117023CC901D0E1F0034C0002ADA002C901D00BF0B2ADA00B
+      	S117025002C980D01EF0CA186EA102ADA102C900F0350DA28D
+      	S1170264028D00A220A302A9018DA0024C00022EA202ADA244
+      	S117027802C900F0110DA1028D00A220A302A9808DA0024C5A
+      	S117028C2102A90F8D00A220A30200A9F08D00A220A30200FE
+      	S11702A0010FF0488A489848A901A2FFA0FF88D0FDCAD0F87B
+      	S10E02B438E901D0F168A868AA68606E
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+                      000001 |;fix check paddle swing at msb and lsb before jumping to main or return swing
+                      000002 |;needs to dec a point if no swing at these points at end of each function loop
+                      000003 |    
+      0200            000004 |    org 0200h
+                      000005 |    
+      0200            000006 |main:
+      0200 AD A0 02   000007 |    lda pongBall
+      0203 8D 00 A2   000008 |    sta 0a200h  ;load pingPongBall and pass it to LED's
+      0206 20 A3 02   000009 |    jsr delay
+      0209 AD 00 A6   000010 |    lda 0a600h ;teensy switches idle high
+      020C 49 FF      000011 |    eor #11111111b
+      020E 29 08      000012 |    and #1000b
+      0210 C9 08      000013 |    cmp #1000b ;player2 press switch
+      0212 F0 3A      000014 |    beq checkSwingP2
+      0214 18         000015 |    clc
+      0215 2E A0 02   000016 |    rol pongBall  ;move ball left 
+      0218 AD A0 02   000017 |    lda pongBall
+      021B C9 80      000018 |    cmp #10000000b
+      021D D0 E1      000019 |    bne main
+      021F F0 2D      000020 |    beq checkSwingP2
+                      000021 |    
+      0221            000022 |returnBall:
+      0221 AD A0 02   000023 |    lda pongBall
+      0224 8D 00 A2   000024 |    sta 0a200h
+      0227 20 A3 02   000025 |    jsr delay
+      022A 18         000026 |    clc
+      022B 6E A0 02   000027 |    ror pongBall
+      022E AD 00 A6   000028 |    lda 0a600h ;teensy switches idle high
+      0231 49 FF      000029 |    eor #11111111b
+      0233 29 01      000030 |    and #1b
+      0235 C9 01      000031 |    cmp #1b
+      0237 F0 0C      000032 |    beq checkSwingP1
+      0239 AD A0 02   000033 |    lda pongBall
+      023C C9 01      000034 |    cmp #1b
+      023E D0 E1      000035 |    bne returnBall
+      0240 F0 03      000036 |    beq checkSwingP1
+      0242 4C 00 02   000037 |    jmp main
+                      000038 |    
+      0245            000039 |checkSwingP1:
+      0245 AD A0 02   000040 |    lda pongBall
+      0248 C9 01      000041 |    cmp #1b
+      024A D0 0B      000042 |    bne decPlayer1
+      024C F0 B2      000043 |    beq main
+                      000044 |    
+      024E            000045 |checkSwingP2:
+      024E AD A0 02   000046 |    lda pongBall
+      0251 C9 80      000047 |    cmp #10000000b
+      0253 D0 1E      000048 |    bne decPlayer2
+      0255 F0 CA      000049 |    beq returnBall
+                      000050 |
+      0257            000051 |decPlayer1:
+      0257 18         000052 |    clc
+      0258 6E A1 02   000053 |    ror player1Score
+      025B AD A1 02   000054 |    lda player1Score
+      025E C9 00      000055 |    cmp #0b
+      0260 F0 35      000056 |    beq Ply2Win
+      0262 0D A2 02   000057 |    ora player2Score
+      0265 8D 00 A2   000058 |    sta 0a200h
+      0268 20 A3 02   000059 |    jsr delay
+      026B A9 01      000060 |    lda #1b
+      026D 8D A0 02   000061 |    sta pongBall
+      0270 4C 00 02   000062 |    jmp main
+                      000063 |    
+      0273            000064 |decPlayer2:
+      0273 2E A2 02   000065 |    rol player2Score
+      0276 AD A2 02   000066 |    lda player2Score
+      0279 C9 00      000067 |    cmp #00000000b
+      027B F0 11      000068 |    beq Ply1Win
+      027D 0D A1 02   000069 |    ora player1Score
+      0280 8D 00 A2   000070 |    sta 0a200h
+      0283 20 A3 02   000071 |    jsr delay
+      0286 A9 80      000072 |    lda #10000000b
+      0288 8D A0 02   000073 |    sta pongBall
+      028B 4C 21 02   000074 |    jmp returnBall
+                      000075 |    
+      028E            000076 |Ply1Win:
+      028E A9 0F      000077 |    lda #1111b
+      0290 8D 00 A2   000078 |    sta 0a200h
+      0293 20 A3 02   000079 |    jsr delay
+      0296 00         000080 |    brk
+                      000081 |    
+      0297            000082 |Ply2Win:
+      0297 A9 F0      000083 |    lda #11110000b
+      0299 8D 00 A2   000084 |    sta 0a200h
+      029C 20 A3 02   000085 |    jsr delay
+      029F 00         000086 |    brk
+                      000087 |
+      02A0            000088 |pongBall:
+      02A0 01         000089 |    dbt 1b
+                      000090 |
+      02A1            000091 |player1Score:
+      02A1 0F         000092 |    dbt 1111b
+                      000093 |
+      02A2            000094 |player2Score:
+      02A2 F0         000095 |    dbt 11110000b
+                      000096 |
+      02A3            000097 |Delay:
+                      000098 |;Save registers on the stack.
+      02A3 48         000099 |	pha
+      02A4 8A         000100 |	txa
+      02A5 48         000101 |	pha
+      02A6 98         000102 |	tya
+      02A7 48         000103 |	pha
+                      000104 |	
+                      000105 |;Change the number that is being loaded into the
+                      000106 |; 'A' register in order to change the delay time.
+      02A8 A9 01      000107 |	lda #01h
+                      000108 |	
+      02AA            000109 |OutLoop:
+      02AA A2 FF      000110 |	ldx #0ffh
+                      000111 |	
+      02AC            000112 |InLoop1:
+      02AC A0 FF      000113 |	ldy #0ffh
+                      000114 |	
+      02AE            000115 |InLoop2:
+      02AE 88         000116 |	dey
+      02AF D0 FD      000117 |	bne InLoop2
+                      000118 |	
+      02B1 CA         000119 |	dex
+      02B2 D0 F8      000120 |	bne InLoop1
+                      000121 |	
+      02B4 38         000122 |	sec
+      02B5 E9 01      000123 |	sbc #1d
+      02B7 D0 F1      000124 |	bne OutLoop
+                      000125 |	
+                      000126 |;Restore registers from the stack.
+      02B9 68         000127 |	pla
+      02BA A8         000128 |	tay
+      02BB 68         000129 |	pla
+      02BC AA         000130 |	tax
+      02BD 68         000131 |	pla
+                      000132 |
+      02BE 60         000133 |	rts
+                      000134 |	
+                      000135 |	end
+      
+      *** Symbol Table ***
+      {PLAYER1SCORE=673, DELAY=675, PLY2WIN=663, MAIN=512, PLAYER2SCORE=674, PONGBALL=672, PLY1WIN=654, INLOOP2=686, INLOOP1=684, CHECKSWINGP2=590, CHECKSWINGP1=581, OUTLOOP=682, DECPLAYER2=627, =0, DECPLAYER1=599, RETURNBALL=545}
+.   %/output
+
+
+

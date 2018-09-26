@@ -1,0 +1,1503 @@
+Assignment 1. v.03.
+
+
+Enter your name in the following fold.
+%info
+
+Thomas Gilman
+
+%/info
+
+
+======================================================================
+Program 1 (15 points).
+
+Write a program that will copy the 100 bytes that start at "source"
+to "destination".
+
+%uasm65,title="Program1"
+OutChar:  equ E003h ;Output byte in A register to serial port.
+OutHex:   equ E012h ;Output a HEX number to the serial port.
+
+	org 0200h
+	
+	ldx #0d             ;start at index 0
+	
+main:
+	lda source,x
+    sta destination,x
+    inx
+    cpx #100d
+    bne main
+    
+    ldx #0d
+    jmp prntDest
+    
+prntDest:               ;make sure digits are correct
+    lda destination,x
+    jsr OutHex
+    lda #44d            ;space digit
+    jsr OutChar
+    inx
+    cpx #100d
+    bne prntDest
+    brk
+
+source:
+	dbt 59d,61d,37d,128d,71d,150d,195d,130d,69d,84d
+	dbt 171d,227d,99d,214d,233d,136d,80d,253d,242d
+	dbt 112d,221d,151d,101d,117d,76d,226d,174d,205d
+	dbt 84d,78d,139d,89d,195d,243d,69d,128d,217d,215d
+	dbt 57d,100d,227d,226d,233d,238d,229d,228d,135d
+	dbt 140d,98d,211d,245d,120d,206d,198d,47d,191d
+	dbt 239d,27d,236d,12d,242d,148d,98d,11d,38d,189d
+	dbt 238d,225d,142d,214d,214d,21d,75d,17d,190d
+	dbt 178d,123d,125d,123d,10d,166d,123d,135d,220d
+	dbt 193d,46d,248d,222d,63d,206d,197d,101d,144d
+	dbt 201d,233d,12d,241d,85d,180d,29d
+	
+destination:
+	dbt 100d(0d)
+
+	end
+
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200A200BD23029D8702E8E064D0F5A2004C1202BD8705
+      	S1170214022012E0A92C2003E0E8E064D0F0003B3D25804796
+      	S117022896C3824554ABE363D6E98850FDF270DD9765754CC9
+      	S117023CE2AECD544E8B59C3F34580D9D73964E3E2E9EEE57E
+      	S1170250E4878C62D3F578CEC62FBFEF1BEC0CF294620B2660
+      	S1170264BDEEE18ED6D6154B11BEB27B7D7B0AA67B87DCC119
+      	S11702782EF8DE3FCEC56590C9E90CF155B41D0000000000CE
+      	S117028C00000000000000000000000000000000000000005A
+      	S11702A0000000000000000000000000000000000000000046
+      	S11702B4000000000000000000000000000000000000000032
+      	S11702C800000000000000000000000000000000000000001E
+      	S11202DC0000000000000000000000000000000F
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+      0000            000001 |OutChar:  equ E003h ;Output byte in A register to serial port.
+      0000            000002 |OutHex:   equ E012h ;Output a HEX number to the serial port.
+                      000003 |
+      0200            000004 |	org 0200h
+                      000005 |	
+      0200 A2 00      000006 |	ldx #0d ;start at index 0
+                      000007 |	
+      0202            000008 |main:
+      0202 BD 23 02   000009 |	lda source,x
+      0205 9D 87 02   000010 |    sta destination,x
+      0208 E8         000011 |    inx
+      0209 E0 64      000012 |    cpx #100d
+      020B D0 F5      000013 |    bne main
+      020D A2 00      000014 |    ldx #0d
+      020F 4C 12 02   000015 |    jmp prntDest
+                      000016 |    
+      0212            000017 |prntDest:
+      0212 BD 87 02   000018 |    lda destination,x
+      0215 20 12 E0   000019 |    jsr OutHex
+      0218 A9 2C      000020 |    lda #44d    ;space digit
+      021A 20 03 E0   000021 |    jsr OutChar
+      021D E8         000022 |    inx
+      021E E0 64      000023 |    cpx #100d
+      0220 D0 F0      000024 |    bne prntDest
+      0222 00         000025 |    brk
+                      000026 |
+      0223            000027 |source:
+      0223 3B         000028 |	dbt 59d,61d,37d,128d,71d,150d,195d,130d,69d,84d
+      0224 3D               
+      0225 25               
+      0226 80               
+      0227 47               
+      0228 96               
+      0229 C3               
+      022A 82               
+      022B 45               
+      022C 54               
+      022D AB         000029 |	dbt 171d,227d,99d,214d,233d,136d,80d,253d,242d
+      022E E3               
+      022F 63               
+      0230 D6               
+      0231 E9               
+      0232 88               
+      0233 50               
+      0234 FD               
+      0235 F2               
+      0236 70         000030 |	dbt 112d,221d,151d,101d,117d,76d,226d,174d,205d
+      0237 DD               
+      0238 97               
+      0239 65               
+      023A 75               
+      023B 4C               
+      023C E2               
+      023D AE               
+      023E CD               
+      023F 54         000031 |	dbt 84d,78d,139d,89d,195d,243d,69d,128d,217d,215d
+      0240 4E               
+      0241 8B               
+      0242 59               
+      0243 C3               
+      0244 F3               
+      0245 45               
+      0246 80               
+      0247 D9               
+      0248 D7               
+      0249 39         000032 |	dbt 57d,100d,227d,226d,233d,238d,229d,228d,135d
+      024A 64               
+      024B E3               
+      024C E2               
+      024D E9               
+      024E EE               
+      024F E5               
+      0250 E4               
+      0251 87               
+      0252 8C         000033 |	dbt 140d,98d,211d,245d,120d,206d,198d,47d,191d
+      0253 62               
+      0254 D3               
+      0255 F5               
+      0256 78               
+      0257 CE               
+      0258 C6               
+      0259 2F               
+      025A BF               
+      025B EF         000034 |	dbt 239d,27d,236d,12d,242d,148d,98d,11d,38d,189d
+      025C 1B               
+      025D EC               
+      025E 0C               
+      025F F2               
+      0260 94               
+      0261 62               
+      0262 0B               
+      0263 26               
+      0264 BD               
+      0265 EE         000035 |	dbt 238d,225d,142d,214d,214d,21d,75d,17d,190d
+      0266 E1               
+      0267 8E               
+      0268 D6               
+      0269 D6               
+      026A 15               
+      026B 4B               
+      026C 11               
+      026D BE               
+      026E B2         000036 |	dbt 178d,123d,125d,123d,10d,166d,123d,135d,220d
+      026F 7B               
+      0270 7D               
+      0271 7B               
+      0272 0A               
+      0273 A6               
+      0274 7B               
+      0275 87               
+      0276 DC               
+      0277 C1         000037 |	dbt 193d,46d,248d,222d,63d,206d,197d,101d,144d
+      0278 2E               
+      0279 F8               
+      027A DE               
+      027B 3F               
+      027C CE               
+      027D C5               
+      027E 65               
+      027F 90               
+      0280 C9         000038 |	dbt 201d,233d,12d,241d,85d,180d,29d
+      0281 E9               
+      0282 0C               
+      0283 F1               
+      0284 55               
+      0285 B4               
+      0286 1D               
+                      000039 |	
+      0287            000040 |destination:
+      0287 00         000041 |	dbt 100d(0d)
+      0288 00 00 00         
+      028B 00 00 00         
+      028E 00 00 00         
+      0291 00 00 00         
+      0294 00 00 00         
+      0297 00 00 00         
+      029A 00 00 00         
+      029D 00 00 00         
+      02A0 00 00 00         
+      02A3 00 00 00         
+      02A6 00 00 00         
+      02A9 00 00 00         
+      02AC 00 00 00         
+      02AF 00 00 00         
+      02B2 00 00 00         
+      02B5 00 00 00         
+      02B8 00 00 00         
+      02BB 00 00 00         
+      02BE 00 00 00         
+      02C1 00 00 00         
+      02C4 00 00 00         
+      02C7 00 00 00         
+      02CA 00 00 00         
+      02CD 00 00 00         
+      02D0 00 00 00         
+      02D3 00 00 00         
+      02D6 00 00 00         
+      02D9 00 00 00         
+      02DC 00 00 00         
+      02DF 00 00 00         
+      02E2 00 00 00         
+      02E5 00 00 00         
+      02E8 00 00 00         
+                      000042 |
+                      000043 |	end
+      
+      *** Symbol Table ***
+      {OUTCHAR=57347, MAIN=514, SOURCE=547, DESTINATION=647, OUTHEX=57362, PRNTDEST=530, =0}
+.   %/output
+
+
+
+
+======================================================================
+Program 2 (15 points).
+
+Write a program that will capitalize all the letters in the string 
+that starts at "string1".
+
+%uasm65,title=""
+
+OutChar:  equ E003h ;Output byte in A register to serial port.
+
+	org 0200h
+	
+	ldx #0d
+
+main:
+;Place your program code here.
+    lda string1,x
+    cmp #96d
+    bcs Check1      ;greater than or equal to a?
+    cmp #0d         ;at the end of the string?
+    bne continue    ;no continue
+    jmp finish      ;yes exit
+    
+continue:
+    jsr OutChar
+    inx
+    jmp main
+
+Check1:
+    cmp #123d
+    bcc Cap         ;is in range of a-z?
+    jsr OutChar     ;print Char if not
+    inx             ;continue through list
+    jmp main
+    
+Cap: ;Capitalize the char
+    clc
+    sbc #33d         ;There is a 32decimal difference between upper and lower Chars
+    jsr OutChar
+    sta string1,x
+    inx
+    jmp main
+
+string1:
+	dbt "A bird in the hand is worth two in the bush. Early to bed and "
+	dbt "early to rise makes a person healthy, wealthy, and wise."
+	dbt 0d
+
+finish:
+	
+	end
+	
+%/uasm65
+
+    %output,mpversion=".255",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A200BD2F02C960B00EC900D0034CA6022003E0E8F4
+      	S11702144C0202C97B90072003E0E84C020218E9212003E047
+      	S11702289D2F02E84C020241206269726420696E207468655E
+      	S117023C2068616E6420697320776F7274682074776F20699C
+      	S11702506E2074686520627573682E204561726C7920746FA7
+      	S11702642062656420616E64206561726C7920746F207269A9
+      	S11702787365206D616B6573206120706572736F6E20686540
+      	S117028C616C7468792C207765616C7468792C20616E64204F
+      	S10902A0776973652E006E
+      	S9030000FC
+      %/s19
+        
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |OutChar:  equ E003h ;Output byte in A register to serial port.
+                      000003 |
+      0200            000004 |	org 0200h
+                      000005 |	
+      0200 A2 00      000006 |	ldx #0d
+                      000007 |
+      0202            000008 |main:
+                      000009 |;Place your program code here.
+      0202 BD 2F 02   000010 |    lda string1,x
+                      000011 |    ;jsr OutChar
+      0205 C9 60      000012 |    cmp #96d
+      0207 B0 0E      000013 |    bcs Check1      ;greater than or equal to a?
+      0209 C9 00      000014 |    cmp #0d         ;at the end of the string?
+      020B D0 03      000015 |    bne continue    ;no continue
+      020D 4C A6 02   000016 |    jmp finish      ;yes exit
+                      000017 |    
+      0210            000018 |continue:
+      0210 20 03 E0   000019 |    jsr OutChar
+      0213 E8         000020 |    inx
+      0214 4C 02 02   000021 |    jmp main
+                      000022 |
+      0217            000023 |Check1:
+      0217 C9 7B      000024 |    cmp #123d
+      0219 90 07      000025 |    bcc Cap         ;is in range of a-z?
+      021B 20 03 E0   000026 |    jsr OutChar     ;print Char if not
+      021E E8         000027 |    inx             ;continue through list
+      021F 4C 02 02   000028 |    jmp main
+                      000029 |    
+      0222            000030 |Cap: ;Capitalize the char
+      0222 18         000031 |    clc
+      0223 E9 21      000032 |    sbc #33d         ;There is a 32decimal difference between upper and lower Chars
+      0225 20 03 E0   000033 |    jsr OutChar
+      0228 9D 2F 02   000034 |    sta string1,x
+      022B E8         000035 |    inx
+      022C 4C 02 02   000036 |    jmp main
+                      000037 |
+      022F            000038 |string1:
+      022F 41         000039 |	dbt "A bird in the hand is worth two in the bush. Early to bed and "
+      0230 20 62 69         
+      0233 72 64 20         
+      0236 69 6E 20         
+      0239 74 68 65         
+      023C 20 68 61         
+      023F 6E 64 20         
+      0242 69 73 20         
+      0245 77 6F 72         
+      0248 74 68 20         
+      024B 74 77 6F         
+      024E 20 69 6E         
+      0251 20 74 68         
+      0254 65 20 62         
+      0257 75 73 68         
+      025A 2E 20 45         
+      025D 61 72 6C         
+      0260 79 20 74         
+      0263 6F 20 62         
+      0266 65 64 20         
+      0269 61 6E 64         
+      026C 20               
+      026D 65         000040 |	dbt "early to rise makes a person healthy, wealthy, and wise."
+      026E 61 72 6C         
+      0271 79 20 74         
+      0274 6F 20 72         
+      0277 69 73 65         
+      027A 20 6D 61         
+      027D 6B 65 73         
+      0280 20 61 20         
+      0283 70 65 72         
+      0286 73 6F 6E         
+      0289 20 68 65         
+      028C 61 6C 74         
+      028F 68 79 2C         
+      0292 20 77 65         
+      0295 61 6C 74         
+      0298 68 79 2C         
+      029B 20 61 6E         
+      029E 64 20 77         
+      02A1 69 73 65         
+      02A4 2E               
+      02A5 00         000041 |	dbt 0d
+                      000042 |
+      02A6            000043 |finish:
+                      000044 |	
+                      000045 |	end
+      
+      *** Symbol Table ***
+      {FINISH=678, CAP=546, CHECK1=535, OUTCHAR=57347, MAIN=514, STRING1=559, CONTINUE=528, =0}
+.   %/output
+
+
+
+
+======================================================================
+Program 3 (15 points).
+
+Write a program that exchanges the upper and lower nibbles in the 
+100 bytes that begin at "numbers".
+
+%uasm65,title="Exchange Nibbles"
+OutChar:  equ E003h ;Output byte in A register to serial port.
+OutHex:   equ E012h ;Output a HEX number to the serial port.
+
+	org 0200h
+	
+	ldx #0d
+
+main:
+
+    lda numbers,x
+    jsr OutHex
+    
+    and #11110000b ;mask lowerNibble off
+    sta upperNib   ;Store upper nibble off
+    
+    clc
+    ror upperNib
+    clc
+    ror upperNib
+    clc
+    ror upperNib
+    clc
+    ror upperNib
+    
+    lda numbers,x
+    and #00001111b  ;mask upperNibble off
+    sta lowerNib    ;Store away lower nibble
+    
+    clc
+    rol lowerNib
+    clc
+    rol lowerNib
+    clc
+    rol lowerNib
+    clc
+    rol lowerNib
+    
+    lda lowerNib
+    ora upperNib    ;put the two nibbles back together
+    
+    jsr OutHex
+    sta numbers,x   ;put back into numbers
+    
+    lda #44d
+    jsr OutChar     ;output space char
+    
+    inx             ;move to next number
+    
+    cpx #100d      ;at end of list
+    bne main
+    jmp finish
+
+numbers:
+	dbt 1Fh,4Dh,38h,4Ch,23h,D9h,FCh,36h,CFh,17h,35h,70h
+	dbt 8Fh,9Eh,20h,9Bh,27h,2Ch,7Bh,30h,E4h,7Ch,9Bh,89h
+	dbt EAh,78h,A0h,52h,28h,D5h,DCh,69h,88h,75h,80h,7Dh
+	dbt D7h,55h,9Dh,BCh,12h,D2h,7Fh,DEh,92h,11h,8Ah,E6h
+	dbt AFh,5Eh,89h,D4h,92h,5Ah,A2h,B8h,BBh,B6h,D8h,54h
+	dbt DBh,5Dh,58h,B9h,7Eh,CDh,72h,19h,2Ch,7Ch,77h,30h
+	dbt 7Ch,19h,6Eh,89h,B5h,66h,C2h,EFh,89h,96h,F3h,63h
+	dbt 82h,F0h,56h,DCh,9Ah,7Eh,FCh,29h,B4h,B3h,CDh,3Dh
+	dbt 58h,BEh,DCh,44h
+
+upperNib:
+    dbt 0h
+lowerNib:
+    dbt 0h
+	
+
+finish:
+	end
+
+%/uasm65
+
+    %output,mpversion=".255",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A200BD4E022012E029F08DB202186EB202186EB259
+      	S117021402186EB202186EB202BD4E02290F8DB302182EB3DC
+      	S117022802182EB302182EB302182EB302ADB3020DB2022088
+      	S117023C12E09D4E02A92C2003E0E8E064D0B74CB4021F4DD2
+      	S1170250384C23D9FC36CF1735708F9E209B272C7B30E47C13
+      	S11702649B89EA78A05228D5DC698875807DD7559DBC12D265
+      	S11702787FDE92118AE6AF5E89D4925AA2B8BBB6D854DB5D79
+      	S117028C58B97ECD72192C7C77307C196E89B566C2EF8996AD
+      	S11702A0F36382F056DC9A7EFC29B4B3CD3D58BEDC44000068
+      	S10302B446
+      	S9030000FC
+      %/s19
+        
+      *** List File ***
+      
+      0000            000001 |OutChar:  equ E003h ;Output byte in A register to serial port.
+      0000            000002 |OutHex:   equ E012h ;Output a HEX number to the serial port.
+                      000003 |
+      0200            000004 |	org 0200h
+                      000005 |	
+      0200 A2 00      000006 |	ldx #0d
+                      000007 |
+      0202            000008 |main:
+                      000009 |
+      0202 BD 4E 02   000010 |    lda numbers,x
+      0205 20 12 E0   000011 |    jsr OutHex
+                      000012 |    
+      0208 29 F0      000013 |    and #11110000b ;mask lowerNibble off
+      020A 8D B2 02   000014 |    sta upperNib   ;Store upper nibble off
+                      000015 |    
+      020D 18         000016 |    clc
+      020E 6E B2 02   000017 |    ror upperNib
+      0211 18         000018 |    clc
+      0212 6E B2 02   000019 |    ror upperNib
+      0215 18         000020 |    clc
+      0216 6E B2 02   000021 |    ror upperNib
+      0219 18         000022 |    clc
+      021A 6E B2 02   000023 |    ror upperNib
+                      000024 |    
+      021D BD 4E 02   000025 |    lda numbers,x
+      0220 29 0F      000026 |    and #00001111b  ;mask upperNibble off
+      0222 8D B3 02   000027 |    sta lowerNib    ;Store away lower nibble
+                      000028 |    
+      0225 18         000029 |    clc
+      0226 2E B3 02   000030 |    rol lowerNib
+      0229 18         000031 |    clc
+      022A 2E B3 02   000032 |    rol lowerNib
+      022D 18         000033 |    clc
+      022E 2E B3 02   000034 |    rol lowerNib
+      0231 18         000035 |    clc
+      0232 2E B3 02   000036 |    rol lowerNib
+                      000037 |    
+      0235 AD B3 02   000038 |    lda lowerNib
+      0238 0D B2 02   000039 |    ora upperNib    ;put the two nibbles back together
+                      000040 |    
+      023B 20 12 E0   000041 |    jsr OutHex
+      023E 9D 4E 02   000042 |    sta numbers,x   ;put back into numbers
+                      000043 |    
+      0241 A9 2C      000044 |    lda #44d
+      0243 20 03 E0   000045 |    jsr OutChar     ;output space char
+                      000046 |    
+      0246 E8         000047 |    inx             ;move to next number
+                      000048 |    
+      0247 E0 64      000049 |    cpx #100d      ;at end of list
+      0249 D0 B7      000050 |    bne main
+      024B 4C B4 02   000051 |    jmp finish
+                      000052 |
+      024E            000053 |numbers:
+      024E 1F         000054 |	dbt 1Fh,4Dh,38h,4Ch,23h,D9h,FCh,36h,CFh,17h,35h,70h
+      024F 4D               
+      0250 38               
+      0251 4C               
+      0252 23               
+      0253 D9               
+      0254 FC               
+      0255 36               
+      0256 CF               
+      0257 17               
+      0258 35               
+      0259 70               
+      025A 8F         000055 |	dbt 8Fh,9Eh,20h,9Bh,27h,2Ch,7Bh,30h,E4h,7Ch,9Bh,89h
+      025B 9E               
+      025C 20               
+      025D 9B               
+      025E 27               
+      025F 2C               
+      0260 7B               
+      0261 30               
+      0262 E4               
+      0263 7C               
+      0264 9B               
+      0265 89               
+      0266 EA         000056 |	dbt EAh,78h,A0h,52h,28h,D5h,DCh,69h,88h,75h,80h,7Dh
+      0267 78               
+      0268 A0               
+      0269 52               
+      026A 28               
+      026B D5               
+      026C DC               
+      026D 69               
+      026E 88               
+      026F 75               
+      0270 80               
+      0271 7D               
+      0272 D7         000057 |	dbt D7h,55h,9Dh,BCh,12h,D2h,7Fh,DEh,92h,11h,8Ah,E6h
+      0273 55               
+      0274 9D               
+      0275 BC               
+      0276 12               
+      0277 D2               
+      0278 7F               
+      0279 DE               
+      027A 92               
+      027B 11               
+      027C 8A               
+      027D E6               
+      027E AF         000058 |	dbt AFh,5Eh,89h,D4h,92h,5Ah,A2h,B8h,BBh,B6h,D8h,54h
+      027F 5E               
+      0280 89               
+      0281 D4               
+      0282 92               
+      0283 5A               
+      0284 A2               
+      0285 B8               
+      0286 BB               
+      0287 B6               
+      0288 D8               
+      0289 54               
+      028A DB         000059 |	dbt DBh,5Dh,58h,B9h,7Eh,CDh,72h,19h,2Ch,7Ch,77h,30h
+      028B 5D               
+      028C 58               
+      028D B9               
+      028E 7E               
+      028F CD               
+      0290 72               
+      0291 19               
+      0292 2C               
+      0293 7C               
+      0294 77               
+      0295 30               
+      0296 7C         000060 |	dbt 7Ch,19h,6Eh,89h,B5h,66h,C2h,EFh,89h,96h,F3h,63h
+      0297 19               
+      0298 6E               
+      0299 89               
+      029A B5               
+      029B 66               
+      029C C2               
+      029D EF               
+      029E 89               
+      029F 96               
+      02A0 F3               
+      02A1 63               
+      02A2 82         000061 |	dbt 82h,F0h,56h,DCh,9Ah,7Eh,FCh,29h,B4h,B3h,CDh,3Dh
+      02A3 F0               
+      02A4 56               
+      02A5 DC               
+      02A6 9A               
+      02A7 7E               
+      02A8 FC               
+      02A9 29               
+      02AA B4               
+      02AB B3               
+      02AC CD               
+      02AD 3D               
+      02AE 58         000062 |	dbt 58h,BEh,DCh,44h
+      02AF BE               
+      02B0 DC               
+      02B1 44               
+                      000063 |
+      02B2            000064 |upperNib:
+      02B2 00         000065 |    dbt 0h
+      02B3            000066 |lowerNib:
+      02B3 00         000067 |    dbt 0h
+                      000068 |	
+                      000069 |
+      02B4            000070 |finish:
+                      000071 |	end
+      
+      *** Symbol Table ***
+      {LOWERNIB=691, FINISH=692, OUTCHAR=57347, MAIN=514, UPPERNIB=690, NUMBERS=590, OUTHEX=57362, =0}
+.   %/output
+
+
+
+
+======================================================================
+Program 4 (15 points).
+
+Write a program that contains a subroutine that prints the string
+"A stitch in time saves nine." Have the main program call the subroutine
+3 times.
+
+
+%uasm65,title=""
+;************************************************************
+;              Monitor Utility Subroutine Jump Table.
+;************************************************************
+PrntMess: equ E00Ch ;Print a message to the serial port.
+
+;**************************************
+;      Program entry point.
+;**************************************
+	org 0200h
+
+main:
+;Place your program code here.
+    lda T
+    cmp #3d
+    beq finish
+    jmp outMess
+
+outMess:
+    ldx #InMess<
+    ldy #InMess>
+    jsr PrntMess
+    jsr delay
+    inc T
+    jmp main
+
+delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0dfh
+	
+InLoop1:
+	ldy #0dfh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts    
+
+;string    
+InMess:
+	dbt 0ah,0dh
+	dbt "A stitch in time saves nine."
+	dbt 0d
+
+;printTimes	
+T:
+    dbt 0b
+
+finish:
+    end
+
+%/uasm65
+
+    %output,mpversion=".255",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200AD5502C903F04F4C0A02A236A002200CE0201A02BD
+      	S1170214EE55024C0002488A489848A901A2DFA0DF88D0FD46
+      	S1170228CAD0F838E901D0F168A868AA68600A0D4120737400
+      	S117023C6974636820696E2074696D65207361766573206E6C
+      	S1090250696E652E00003A
+      	S9030000FC
+      %/s19
+         
+      *** List File ***
+      
+                      000001 |;************************************************************
+                      000002 |;              Monitor Utility Subroutine Jump Table.
+                      000003 |;************************************************************
+      0000            000004 |OutChar:  equ E003h ;Output byte in A register to serial port.
+                      000005 |
+      0000            000006 |GetChar:  equ E006h ;Get a byte from the serial port.
+                      000007 |
+      0000            000008 |GetCharW: equ E009h ;Wait and get a byte from the serial port.
+                      000009 |
+      0000            000010 |PrntMess: equ E00Ch ;Print a message to the serial port.
+                      000011 |
+      0000            000012 |OutSpace: equ E00Fh ;Output spaces to the serial port.
+                      000013 |
+      0000            000014 |OutHex:   equ E012h ;Output a HEX number to the serial port.
+                      000015 |
+      0000            000016 |DgtToBin: equ E015h ;Convert an ASCII digit into binary.
+                      000017 |
+      0000            000018 |GetLine:  equ E018h ;Input a line from the serial port.
+                      000019 |
+                      000020 |
+                      000021 |;**************************************
+                      000022 |;      Program entry point.
+                      000023 |;**************************************
+      0200            000024 |	org 0200h
+                      000025 |
+      0200            000026 |main:
+                      000027 |;Place your program code here.
+      0200 AD 55 02   000028 |    lda T
+      0203 C9 03      000029 |    cmp #3d
+      0205 F0 4F      000030 |    beq finish
+      0207 4C 0A 02   000031 |    jmp outMess
+                      000032 |
+      020A            000033 |outMess:
+      020A A2 36      000034 |    ldx #InMess<
+      020C A0 02      000035 |    ldy #InMess>
+      020E 20 0C E0   000036 |    jsr PrntMess
+      0211 20 1A 02   000037 |    jsr delay
+      0214 EE 55 02   000038 |    inc T
+      0217 4C 00 02   000039 |    jmp main
+                      000040 |
+      021A            000041 |delay:
+                      000042 |;Save registers on the stack.
+      021A 48         000043 |	pha
+      021B 8A         000044 |	txa
+      021C 48         000045 |	pha
+      021D 98         000046 |	tya
+      021E 48         000047 |	pha
+                      000048 |	
+                      000049 |;Change the number that is being loaded into the
+                      000050 |; 'A' register in order to change the delay time.
+      021F A9 01      000051 |	lda #01h
+                      000052 |	
+      0221            000053 |OutLoop:
+      0221 A2 DF      000054 |	ldx #0dfh
+                      000055 |	
+      0223            000056 |InLoop1:
+      0223 A0 DF      000057 |	ldy #0dfh
+                      000058 |	
+      0225            000059 |InLoop2:
+      0225 88         000060 |	dey
+      0226 D0 FD      000061 |	bne InLoop2
+                      000062 |	
+      0228 CA         000063 |	dex
+      0229 D0 F8      000064 |	bne InLoop1
+                      000065 |	
+      022B 38         000066 |	sec
+      022C E9 01      000067 |	sbc #1d
+      022E D0 F1      000068 |	bne OutLoop
+                      000069 |	
+                      000070 |;Restore registers from the stack.
+      0230 68         000071 |	pla
+      0231 A8         000072 |	tay
+      0232 68         000073 |	pla
+      0233 AA         000074 |	tax
+      0234 68         000075 |	pla
+                      000076 |
+      0235 60         000077 |	rts    
+                      000078 |
+                      000079 |;string    
+      0236            000080 |InMess:
+      0236 0A         000081 |	dbt 0ah,0dh
+      0237 0D               
+      0238 41         000082 |	dbt "A stitch in time saves nine."
+      0239 20 73 74         
+      023C 69 74 63         
+      023F 68 20 69         
+      0242 6E 20 74         
+      0245 69 6D 65         
+      0248 20 73 61         
+      024B 76 65 73         
+      024E 20 6E 69         
+      0251 6E 65 2E         
+      0254 00         000083 |	dbt 0d
+                      000084 |
+                      000085 |;printTimes	
+      0255            000086 |T:
+      0255 00         000087 |    dbt 0b
+                      000088 |
+      0256            000089 |finish:
+                      000090 |    end
+      
+      *** Symbol Table ***
+      {INMESS=566, PRNTMESS=57356, OUTMESS=522, GETCHAR=57350, T=597, INLOOP2=549, INLOOP1=547, OUTCHAR=57347, OUTLOOP=545, DELAY=538, OUTSPACE=57359, MAIN=512, FINISH=598, GETCHARW=57353, GETLINE=57368, DGTTOBIN=57365, OUTHEX=57362, =0}
+.   %/output
+
+
+
+
+======================================================================
+Program 5 (15 points).
+
+Write a program that will sort the 100 integers starting at "numbers"
+into ascending order.
+
+%uasm65,title=""
+OutChar:  equ E003h ;Output byte in A register to serial port.
+OutHex:   equ E012h ;Output a HEX number to the serial port.
+
+	org 0200h
+	
+	ldx #0d            ;index 0 of numbers
+
+main:
+    cpx #100d
+    beq exit          ;exit at end of list
+    
+    lda numbers,x
+    sta comparitor1
+    inx
+    
+    lda numbers,x       ;load next index looked at into a
+    cmp comparitor1
+    bcc swap            ;next index is less than prev
+    
+    jmp main            ;greater, check next index
+    
+exit:
+    ldx #0d
+    jmp goThroughList
+    
+goThroughList:
+    lda numbers,x
+    jsr OutHex
+    lda #44d
+    jsr OutChar     ;output space char
+    inx
+    cpx #100d
+    bne goThroughList
+    brk
+    
+swap:
+    tay                 ;transfer number to y
+    lda comparitor1     ;load prev num
+    sta numbers,x       ;store in index
+    
+    dex                 ;go back
+    tya                 ;transfer lower num back
+    sta numbers,x       ;store smaller num in space
+    ldx #0d
+    jmp main            ;return
+    
+comparitor1:
+    dbt 0d
+
+numbers:
+	dbt 59d,61d,37d,128d,71d,150d,195d,130d,69d,84d
+	dbt 171d,227d,99d,214d,233d,136d,80d,253d,242d
+	dbt 112d,221d,151d,101d,117d,76d,226d,174d,205d
+	dbt 84d,78d,139d,89d,195d,243d,69d,128d,217d,215d
+	dbt 57d,100d,227d,226d,233d,238d,229d,228d,135d
+	dbt 140d,98d,211d,245d,120d,206d,198d,47d,191d
+	dbt 239d,27d,236d,12d,242d,148d,98d,11d,38d,189d
+	dbt 238d,225d,142d,214d,214d,21d,75d,17d,190d
+	dbt 178d,123d,125d,123d,10d,166d,123d,135d,220d
+	dbt 193d,46d,248d,222d,63d,206d,197d,101d,144d
+	dbt 201d,233d,12d,241d,85d,180d,29d
+
+finish:
+	end
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200A200E064F012BD40028D3F02E8BD4002CD3F0290AC
+      	S1170214194C0202A2004C1D02BD40022012E0A92C2003E073
+      	S1170228E8E064D0F000A8AD3F029D4002CA989D4002A2007A
+      	S117023C4C0202003B3D25804796C3824554ABE363D6E9884A
+      	S117025050FDF270DD9765754CE2AECD544E8B59C3F34580EF
+      	S1170264D9D73964E3E2E9EEE5E4878C62D3F578CEC62FBF99
+      	S1170278EF1BEC0CF294620B26BDEEE18ED6D6154B11BEB2AC
+      	S117028C7B7D7B0AA67B87DCC12EF8DE3FCEC56590C9E90C0F
+      	S10702A0F155B41D3F
+      	S9030000FC
+      %/s19
+        
+      *** List File ***
+      
+      0000            000001 |OutChar:  equ E003h ;Output byte in A register to serial port.
+      0000            000002 |OutHex:   equ E012h ;Output a HEX number to the serial port.
+                      000003 |
+      0200            000004 |	org 0200h
+                      000005 |	
+      0200 A2 00      000006 |	ldx #0d            ;index 0 of numbers
+                      000007 |
+      0202            000008 |main:
+      0202 E0 64      000009 |    cpx #100d
+      0204 F0 12      000010 |    beq exit          ;exit at end of list
+                      000011 |    
+      0206 BD 40 02   000012 |    lda numbers,x
+      0209 8D 3F 02   000013 |    sta comparitor1
+      020C E8         000014 |    inx
+                      000015 |    
+      020D BD 40 02   000016 |    lda numbers,x       ;load next index looked at into a
+      0210 CD 3F 02   000017 |    cmp comparitor1
+      0213 90 19      000018 |    bcc swap            ;next index is less than prev
+                      000019 |    
+      0215 4C 02 02   000020 |    jmp main            ;greater, check next index
+                      000021 |    
+      0218            000022 |exit:
+      0218 A2 00      000023 |    ldx #0d
+      021A 4C 1D 02   000024 |    jmp goThroughList
+                      000025 |    
+      021D            000026 |goThroughList:
+      021D BD 40 02   000027 |    lda numbers,x
+      0220 20 12 E0   000028 |    jsr OutHex
+      0223 A9 2C      000029 |    lda #44d
+      0225 20 03 E0   000030 |    jsr OutChar     ;output space char
+      0228 E8         000031 |    inx
+      0229 E0 64      000032 |    cpx #100d
+      022B D0 F0      000033 |    bne goThroughList
+      022D 00         000034 |    brk
+                      000035 |    
+      022E            000036 |swap:
+      022E A8         000037 |    tay                 ;transfer number to y
+      022F AD 3F 02   000038 |    lda comparitor1     ;load prev num
+      0232 9D 40 02   000039 |    sta numbers,x       ;store in index
+                      000040 |    
+      0235 CA         000041 |    dex                 ;go back
+      0236 98         000042 |    tya                 ;transfer lower num back
+      0237 9D 40 02   000043 |    sta numbers,x       ;store smaller num in space
+      023A A2 00      000044 |    ldx #0d
+      023C 4C 02 02   000045 |    jmp main            ;return
+                      000046 |    
+      023F            000047 |comparitor1:
+      023F 00         000048 |    dbt 0d
+                      000049 |
+      0240            000050 |numbers:
+      0240 3B         000051 |	dbt 59d,61d,37d,128d,71d,150d,195d,130d,69d,84d
+      0241 3D               
+      0242 25               
+      0243 80               
+      0244 47               
+      0245 96               
+      0246 C3               
+      0247 82               
+      0248 45               
+      0249 54               
+      024A AB         000052 |	dbt 171d,227d,99d,214d,233d,136d,80d,253d,242d
+      024B E3               
+      024C 63               
+      024D D6               
+      024E E9               
+      024F 88               
+      0250 50               
+      0251 FD               
+      0252 F2               
+      0253 70         000053 |	dbt 112d,221d,151d,101d,117d,76d,226d,174d,205d
+      0254 DD               
+      0255 97               
+      0256 65               
+      0257 75               
+      0258 4C               
+      0259 E2               
+      025A AE               
+      025B CD               
+      025C 54         000054 |	dbt 84d,78d,139d,89d,195d,243d,69d,128d,217d,215d
+      025D 4E               
+      025E 8B               
+      025F 59               
+      0260 C3               
+      0261 F3               
+      0262 45               
+      0263 80               
+      0264 D9               
+      0265 D7               
+      0266 39         000055 |	dbt 57d,100d,227d,226d,233d,238d,229d,228d,135d
+      0267 64               
+      0268 E3               
+      0269 E2               
+      026A E9               
+      026B EE               
+      026C E5               
+      026D E4               
+      026E 87               
+      026F 8C         000056 |	dbt 140d,98d,211d,245d,120d,206d,198d,47d,191d
+      0270 62               
+      0271 D3               
+      0272 F5               
+      0273 78               
+      0274 CE               
+      0275 C6               
+      0276 2F               
+      0277 BF               
+      0278 EF         000057 |	dbt 239d,27d,236d,12d,242d,148d,98d,11d,38d,189d
+      0279 1B               
+      027A EC               
+      027B 0C               
+      027C F2               
+      027D 94               
+      027E 62               
+      027F 0B               
+      0280 26               
+      0281 BD               
+      0282 EE         000058 |	dbt 238d,225d,142d,214d,214d,21d,75d,17d,190d
+      0283 E1               
+      0284 8E               
+      0285 D6               
+      0286 D6               
+      0287 15               
+      0288 4B               
+      0289 11               
+      028A BE               
+      028B B2         000059 |	dbt 178d,123d,125d,123d,10d,166d,123d,135d,220d
+      028C 7B               
+      028D 7D               
+      028E 7B               
+      028F 0A               
+      0290 A6               
+      0291 7B               
+      0292 87               
+      0293 DC               
+      0294 C1         000060 |	dbt 193d,46d,248d,222d,63d,206d,197d,101d,144d
+      0295 2E               
+      0296 F8               
+      0297 DE               
+      0298 3F               
+      0299 CE               
+      029A C5               
+      029B 65               
+      029C 90               
+      029D C9         000061 |	dbt 201d,233d,12d,241d,85d,180d,29d
+      029E E9               
+      029F 0C               
+      02A0 F1               
+      02A1 55               
+      02A2 B4               
+      02A3 1D               
+                      000062 |
+      02A4            000063 |finish:
+                      000064 |	end
+      
+      *** Symbol Table ***
+      {EXIT=536, SWAP=558, MAIN=514, NUMBERS=576, GOTHROUGHLIST=541, COMPARITOR1=575, FINISH=676, OUTCHAR=57347, OUTHEX=57362, =0}
+.   %/output
+
+
+
+======================================================================
+Program 6 (25 points).
+
+Write a program that enables the user to use some of the switches that
+are at memory location A600 to move a single light around the 8x2 grid
+of LEDs that are formed by memory locations A200h and A400h.
+
+%uasm65,title=""
+	org 0200h
+	
+	lda #1b
+	sta 0a200h
+	
+main:
+    lda topRowL
+    beq LightsInBottom
+    
+    lda 0a600h
+    and #1111b  ;user wants to exit
+    cmp #1111b
+    beq jmpFin
+    
+    lda 0a600h
+    and #0001b     ;user wants to move right
+    cmp #0001b
+    beq TopMoveRight
+    
+    lda 0a600h
+    and #1000b  ;user wants to move left
+    cmp #1000b
+    beq TopMoveLeft
+
+    lda 0a600h
+    and #0010b  ;user wants to move down
+    cmp #0010b
+    bne main
+    
+    lda 0a200h
+    sta 0a400h
+    lda #00000000b
+    sta 0a200h
+    dec topRowL ;should only get here if user wants to move down
+    jmp LightsInBottom
+    
+TopMoveRight:
+    lda 0a200h
+    cmp #1b     ;is bit at lsb already?
+    beq main
+    
+    clc
+    ror 0a200h  ;rotate bit right
+    jsr delay   ;wait a little 
+    jmp main
+    
+TopMoveLeft:
+    lda 0a200h
+    cmp #10000000b  ;is bit at msb already
+    beq main
+    
+    clc
+    rol 0a200h  ;rotate bit left
+    jsr delay   ;wait a little
+    jmp main
+    
+jmpFin:
+    jmp finish
+    
+jmpMain:
+    jmp main
+    
+LightsInBottom:
+    lda topRowL
+    bne main
+    
+    lda 0a600h
+    and #1111b  ;user wants to exit
+    cmp #1111b
+    beq jmpFin
+    
+    lda 0a600h
+    and #0001b     ;user wants to move right
+    cmp #0001b
+    beq BottomMoveRight
+    
+    lda 0a600h
+    and #1000b  ;user wants to move left
+    cmp #1000b
+    beq BottomMoveLeft
+
+    lda 0a600h
+    and #0100b  ;user wants to move down
+    cmp #0100b
+    bne LightsInBottom
+    
+    lda 0a400h
+    sta 0a200h
+    lda #00000000b
+    sta 0a400h
+    inc topRowL
+    jmp main
+    
+BottomMoveRight:
+    lda 0a400h
+    cmp #1b     ;is bit at lsb already?
+    beq jmpMain
+    
+    clc
+    ror 0a400h  ;rotate bit right
+    jsr delay   ;wait a little 
+    jmp LightsInBottom
+
+BottomMoveLeft:
+    lda 0a400h
+    cmp #10000000b  ;is bit at msb already
+    beq jmpMain
+    
+    clc
+    rol 0a400h  ;rotate bit left
+    jsr delay   ;wait a little
+    jmp LightsInBottom
+    
+delay:
+    pha
+    txa
+    pha             ;save registers to stack
+    tya
+    pha
+    
+    lda #01h
+    
+OutLoop:
+    ldx #0ffh
+    
+InLoop1:
+    ldy #0ffh
+    
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+	pla
+	tay
+	pla            ;Restore registers from the stack.
+	tax
+	pla
+
+	rts
+    
+topRowL:
+    dbt 1d
+
+finish:
+	end
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200A9018D00A2ADDF02F05DAD00A6290FC90FF04EADE4
+      	S117021400A62901C901F023AD00A62908C908F02BAD00A662
+      	S11702282902C902D0D7AD00A28D00A4A9008D00A2CEDF021A
+      	S117023C4C6702AD00A2C901F0BF186E00A220C3024C0502CD
+      	S1170250AD00A2C980F0AE182E00A220C3024C05024CE00212
+      	S11702644C0502ADDF02D099AD00A6290FC90FF0ECAD00A6A6
+      	S11702782901C901F023AD00A62908C908F02BAD00A6290477
+      	S117028CC904D0D7AD00A48D00A2A9008D00A4EEDF024C056C
+      	S11702A002AD00A4C901F0BC186E00A420C3024C6702AD000C
+      	S11702B4A4C980F0AB182E00A420C3024C6702488A4898482C
+      	S11702C8A901A2FFA0FF88D0FDCAD0F838E901D0F168A868F2
+      	S10702DCAA686001A7
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+      0200            000001 |	org 0200h
+                      000002 |	
+      0200 A9 01      000003 |	lda #1b
+      0202 8D 00 A2   000004 |	sta 0a200h
+                      000005 |	
+      0205            000006 |main:
+      0205 AD DF 02   000007 |    lda topRowL
+      0208 F0 5D      000008 |    beq LightsInBottom
+                      000009 |    
+      020A AD 00 A6   000010 |    lda 0a600h
+      020D 29 0F      000011 |    and #1111b  ;user wants to exit
+      020F C9 0F      000012 |    cmp #1111b
+      0211 F0 4E      000013 |    beq jmpFin
+                      000014 |    
+      0213 AD 00 A6   000015 |    lda 0a600h
+      0216 29 01      000016 |    and #0001b     ;user wants to move right
+      0218 C9 01      000017 |    cmp #0001b
+      021A F0 23      000018 |    beq TopMoveRight
+                      000019 |    
+      021C AD 00 A6   000020 |    lda 0a600h
+      021F 29 08      000021 |    and #1000b  ;user wants to move left
+      0221 C9 08      000022 |    cmp #1000b
+      0223 F0 2B      000023 |    beq TopMoveLeft
+                      000024 |
+      0225 AD 00 A6   000025 |    lda 0a600h
+      0228 29 02      000026 |    and #0010b  ;user wants to move down
+      022A C9 02      000027 |    cmp #0010b
+      022C D0 D7      000028 |    bne main
+                      000029 |    
+      022E AD 00 A2   000030 |    lda 0a200h
+      0231 8D 00 A4   000031 |    sta 0a400h
+      0234 A9 00      000032 |    lda #00000000b
+      0236 8D 00 A2   000033 |    sta 0a200h
+      0239 CE DF 02   000034 |    dec topRowL ;should only get here if user wants to move down
+      023C 4C 67 02   000035 |    jmp LightsInBottom
+                      000036 |    
+      023F            000037 |TopMoveRight:
+      023F AD 00 A2   000038 |    lda 0a200h
+      0242 C9 01      000039 |    cmp #1b     ;is bit at lsb already?
+      0244 F0 BF      000040 |    beq main
+                      000041 |    
+      0246 18         000042 |    clc
+      0247 6E 00 A2   000043 |    ror 0a200h  ;rotate bit right
+      024A 20 C3 02   000044 |    jsr delay   ;wait a little 
+      024D 4C 05 02   000045 |    jmp main
+                      000046 |    
+      0250            000047 |TopMoveLeft:
+      0250 AD 00 A2   000048 |    lda 0a200h
+      0253 C9 80      000049 |    cmp #10000000b  ;is bit at msb already
+      0255 F0 AE      000050 |    beq main
+                      000051 |    
+      0257 18         000052 |    clc
+      0258 2E 00 A2   000053 |    rol 0a200h  ;rotate bit left
+      025B 20 C3 02   000054 |    jsr delay   ;wait a little
+      025E 4C 05 02   000055 |    jmp main
+                      000056 |    
+      0261            000057 |jmpFin:
+      0261 4C E0 02   000058 |    jmp finish
+                      000059 |    
+      0264            000060 |jmpMain:
+      0264 4C 05 02   000061 |    jmp main
+                      000062 |    
+      0267            000063 |LightsInBottom:
+      0267 AD DF 02   000064 |    lda topRowL
+      026A D0 99      000065 |    bne main
+                      000066 |    
+      026C AD 00 A6   000067 |    lda 0a600h
+      026F 29 0F      000068 |    and #1111b  ;user wants to exit
+      0271 C9 0F      000069 |    cmp #1111b
+      0273 F0 EC      000070 |    beq jmpFin
+                      000071 |    
+      0275 AD 00 A6   000072 |    lda 0a600h
+      0278 29 01      000073 |    and #0001b     ;user wants to move right
+      027A C9 01      000074 |    cmp #0001b
+      027C F0 23      000075 |    beq BottomMoveRight
+                      000076 |    
+      027E AD 00 A6   000077 |    lda 0a600h
+      0281 29 08      000078 |    and #1000b  ;user wants to move left
+      0283 C9 08      000079 |    cmp #1000b
+      0285 F0 2B      000080 |    beq BottomMoveLeft
+                      000081 |
+      0287 AD 00 A6   000082 |    lda 0a600h
+      028A 29 04      000083 |    and #0100b  ;user wants to move down
+      028C C9 04      000084 |    cmp #0100b
+      028E D0 D7      000085 |    bne LightsInBottom
+                      000086 |    
+      0290 AD 00 A4   000087 |    lda 0a400h
+      0293 8D 00 A2   000088 |    sta 0a200h
+      0296 A9 00      000089 |    lda #00000000b
+      0298 8D 00 A4   000090 |    sta 0a400h
+      029B EE DF 02   000091 |    inc topRowL
+      029E 4C 05 02   000092 |    jmp main
+                      000093 |    
+      02A1            000094 |BottomMoveRight:
+      02A1 AD 00 A4   000095 |    lda 0a400h
+      02A4 C9 01      000096 |    cmp #1b     ;is bit at lsb already?
+      02A6 F0 BC      000097 |    beq jmpMain
+                      000098 |    
+      02A8 18         000099 |    clc
+      02A9 6E 00 A4   000100 |    ror 0a400h  ;rotate bit right
+      02AC 20 C3 02   000101 |    jsr delay   ;wait a little 
+      02AF 4C 67 02   000102 |    jmp LightsInBottom
+                      000103 |
+      02B2            000104 |BottomMoveLeft:
+      02B2 AD 00 A4   000105 |    lda 0a400h
+      02B5 C9 80      000106 |    cmp #10000000b  ;is bit at msb already
+      02B7 F0 AB      000107 |    beq jmpMain
+                      000108 |    
+      02B9 18         000109 |    clc
+      02BA 2E 00 A4   000110 |    rol 0a400h  ;rotate bit left
+      02BD 20 C3 02   000111 |    jsr delay   ;wait a little
+      02C0 4C 67 02   000112 |    jmp LightsInBottom
+                      000113 |    
+      02C3            000114 |delay:
+      02C3 48         000115 |    pha
+      02C4 8A         000116 |    txa
+      02C5 48         000117 |    pha             ;save registers to stack
+      02C6 98         000118 |    tya
+      02C7 48         000119 |    pha
+                      000120 |    
+      02C8 A9 01      000121 |    lda #01h
+                      000122 |    
+      02CA            000123 |OutLoop:
+      02CA A2 FF      000124 |    ldx #0ffh
+                      000125 |    
+      02CC            000126 |InLoop1:
+      02CC A0 FF      000127 |    ldy #0ffh
+                      000128 |    
+      02CE            000129 |InLoop2:
+      02CE 88         000130 |	dey
+      02CF D0 FD      000131 |	bne InLoop2
+                      000132 |	
+      02D1 CA         000133 |	dex
+      02D2 D0 F8      000134 |	bne InLoop1
+                      000135 |	
+      02D4 38         000136 |	sec
+      02D5 E9 01      000137 |	sbc #1d
+      02D7 D0 F1      000138 |	bne OutLoop
+                      000139 |	
+      02D9 68         000140 |	pla
+      02DA A8         000141 |	tay
+      02DB 68         000142 |	pla            ;Restore registers from the stack.
+      02DC AA         000143 |	tax
+      02DD 68         000144 |	pla
+                      000145 |
+      02DE 60         000146 |	rts
+                      000147 |    
+      02DF            000148 |topRowL:
+      02DF 01         000149 |    dbt 1d
+                      000150 |
+      02E0            000151 |finish:
+                      000152 |	end
+      
+      *** Symbol Table ***
+      {TOPMOVERIGHT=575, DELAY=707, BOTTOMMOVELEFT=690, MAIN=517, BOTTOMMOVERIGHT=673, FINISH=736, INLOOP2=718, INLOOP1=716, JMPFIN=609, TOPMOVELEFT=592, LIGHTSINBOTTOM=615, OUTLOOP=714, TOPROWL=735, =0, JMPMAIN=612}
+.   %/output
+

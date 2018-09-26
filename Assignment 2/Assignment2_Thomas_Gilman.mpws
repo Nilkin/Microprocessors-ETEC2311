@@ -1,0 +1,1191 @@
+1.)
+%uasm65,title="Toggle each bit"
+;done
+
+    org 0200h
+    
+main:
+
+    lda 0a600h
+    cmp #00000001b ;compares switches at 0a600h and if the lsb is high exit
+    beq finish
+    lda bitsend
+    sta 0a200h
+    jsr delay
+    lda bitsend
+    cmp #10000000b
+    beq reset
+    clc ;clear carry set by rol
+    rol bitsend ;shift the bit up one
+    jmp main
+    
+
+bitsend:
+    dbt 1b
+    
+reset:
+    lda #00000001b
+    sta bitsend
+    jmp main
+    
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0fAh
+	
+InLoop1:
+	ldy #0fAh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+finish:
+    end
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200AD00A6C901F03CAD1E028D00A2202702AD1E02C9C2
+      	S117021480F008182E1E024C000201A9018D1E024C000248B8
+      	S11702288A489848A901A2FAA0FA88D0FDCAD0F838E901D053
+      	S10A023CF168A868AA6860DC
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+                      000001 |
+      0200            000002 |    org 0200h
+                      000003 |    
+      0200            000004 |main:
+                      000005 |
+      0200 AD 00 A6   000006 |    lda 0a600h
+      0203 C9 01      000007 |    cmp #00000001b ;compares switches at 0a600h and if the lsb is high exit
+      0205 F0 3C      000008 |    beq finish
+      0207 AD 1E 02   000009 |    lda bitsend
+      020A 8D 00 A2   000010 |    sta 0a200h
+      020D 20 27 02   000011 |    jsr delay
+      0210 AD 1E 02   000012 |    lda bitsend
+      0213 C9 80      000013 |    cmp #10000000b
+      0215 F0 08      000014 |    beq reset
+      0217 18         000015 |    clc ;clear carry set by rol
+      0218 2E 1E 02   000016 |    rol bitsend ;shift the bit up one
+      021B 4C 00 02   000017 |    jmp main
+                      000018 |    
+                      000019 |
+      021E            000020 |bitsend:
+      021E 01         000021 |    dbt 1b
+                      000022 |    
+      021F            000023 |reset:
+      021F A9 01      000024 |    lda #00000001b
+      0221 8D 1E 02   000025 |    sta bitsend
+      0224 4C 00 02   000026 |    jmp main
+                      000027 |    
+      0227            000028 |Delay:
+                      000029 |;Save registers on the stack.
+      0227 48         000030 |	pha
+      0228 8A         000031 |	txa
+      0229 48         000032 |	pha
+      022A 98         000033 |	tya
+      022B 48         000034 |	pha
+                      000035 |	
+                      000036 |;Change the number that is being loaded into the
+                      000037 |; 'A' register in order to change the delay time.
+      022C A9 01      000038 |	lda #01h
+                      000039 |	
+      022E            000040 |OutLoop:
+      022E A2 FA      000041 |	ldx #0fAh
+                      000042 |	
+      0230            000043 |InLoop1:
+      0230 A0 FA      000044 |	ldy #0fAh
+                      000045 |	
+      0232            000046 |InLoop2:
+      0232 88         000047 |	dey
+      0233 D0 FD      000048 |	bne InLoop2
+                      000049 |	
+      0235 CA         000050 |	dex
+      0236 D0 F8      000051 |	bne InLoop1
+                      000052 |	
+      0238 38         000053 |	sec
+      0239 E9 01      000054 |	sbc #1d
+      023B D0 F1      000055 |	bne OutLoop
+                      000056 |	
+                      000057 |;Restore registers from the stack.
+      023D 68         000058 |	pla
+      023E A8         000059 |	tay
+      023F 68         000060 |	pla
+      0240 AA         000061 |	tax
+      0241 68         000062 |	pla
+                      000063 |
+      0242 60         000064 |	rts
+                      000065 |	
+      0243            000066 |finish:
+                      000067 |    end
+      
+      *** Symbol Table ***
+      {DELAY=551, BITSEND=542, RESET=543, MAIN=512, FINISH=579, INLOOP2=562, INLOOP1=560, OUTLOOP=558, =0}
+.   %/output
+
+2.)
+%uasm65,title="increase bits 0123 while decreasing bits 4567"
+;done
+
+    org 0200h
+    
+main:
+    lda 0a600h
+    cmp #1d
+    beq finish
+    lda 0a200h
+    cmp #11111111b
+    beq decrease
+    lda lsbits
+    clc
+    adc msbits
+    sta 0a200h
+    jsr delay
+    jsr inclsb
+    jsr incmsb
+    jmp main
+    
+decrease:
+    lda 0a600h
+    cmp #1d
+    beq finish
+    lda 0a200h
+    cmp #00000000b
+    beq reset
+    clc
+    sbc #00010001b
+    sta 0a200h
+    clc
+    ror 0a200h
+    jsr delay
+    jmp decrease
+
+reset:
+    lda #1b
+    sta lsbits
+    lda #00010000b
+    sta msbits
+    jmp main
+    
+inclsb:
+    rol lsbits
+    rts
+    
+incmsb:
+    clc
+    rol msbits
+    lda msbits
+    clc
+    adc #00010000b
+    sta msbits
+    rts
+
+lsbits:
+    dbt 0001b
+    
+msbits:
+    dbt 00010000b
+
+
+
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0fEh
+	
+InLoop1:
+	ldy #0ffh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+finish: end
+	
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200AD00A6C901F078AD00A2C9FFF016AD6102186D624D
+      	S1170214028D00A2206302204F022053024C0002AD00A6C9CC
+      	S117022801F054AD00A2C900F01018E9118D00A2186E00A2F8
+      	S117023C2063024C2402A9018D6102A9108D62024C00022EF3
+      	S1170250610260182E6202AD62021869108D620260011048DD
+      	S11702648A489848A901A2FEA0FF88D0FDCAD0F838E901D00E
+      	S10A0278F168A868AA6860A0
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+                      000001 |;done
+                      000002 |
+      0200            000003 |    org 0200h
+                      000004 |    
+      0200            000005 |main:
+      0200 AD 00 A6   000006 |    lda 0a600h
+      0203 C9 01      000007 |    cmp #1d
+      0205 F0 78      000008 |    beq finish
+      0207 AD 00 A2   000009 |    lda 0a200h
+      020A C9 FF      000010 |    cmp #11111111b
+      020C F0 16      000011 |    beq decrease
+      020E AD 61 02   000012 |    lda lsbits
+      0211 18         000013 |    clc
+      0212 6D 62 02   000014 |    adc msbits
+      0215 8D 00 A2   000015 |    sta 0a200h
+      0218 20 63 02   000016 |    jsr delay
+      021B 20 4F 02   000017 |    jsr inclsb
+      021E 20 53 02   000018 |    jsr incmsb
+      0221 4C 00 02   000019 |    jmp main
+                      000020 |    
+      0224            000021 |decrease:
+      0224 AD 00 A6   000022 |    lda 0a600h
+      0227 C9 01      000023 |    cmp #1d
+      0229 F0 54      000024 |    beq finish
+      022B AD 00 A2   000025 |    lda 0a200h
+      022E C9 00      000026 |    cmp #00000000b
+      0230 F0 10      000027 |    beq reset
+      0232 18         000028 |    clc
+      0233 E9 11      000029 |    sbc #00010001b
+      0235 8D 00 A2   000030 |    sta 0a200h
+      0238 18         000031 |    clc
+      0239 6E 00 A2   000032 |    ror 0a200h
+      023C 20 63 02   000033 |    jsr delay
+      023F 4C 24 02   000034 |    jmp decrease
+                      000035 |
+      0242            000036 |reset:
+      0242 A9 01      000037 |    lda #1b
+      0244 8D 61 02   000038 |    sta lsbits
+      0247 A9 10      000039 |    lda #00010000b
+      0249 8D 62 02   000040 |    sta msbits
+      024C 4C 00 02   000041 |    jmp main
+                      000042 |    
+      024F            000043 |inclsb:
+      024F 2E 61 02   000044 |    rol lsbits
+      0252 60         000045 |    rts
+                      000046 |    
+      0253            000047 |incmsb:
+      0253 18         000048 |    clc
+      0254 2E 62 02   000049 |    rol msbits
+      0257 AD 62 02   000050 |    lda msbits
+      025A 18         000051 |    clc
+      025B 69 10      000052 |    adc #00010000b
+      025D 8D 62 02   000053 |    sta msbits
+      0260 60         000054 |    rts
+                      000055 |
+      0261            000056 |lsbits:
+      0261 01         000057 |    dbt 0001b
+                      000058 |    
+      0262            000059 |msbits:
+      0262 10         000060 |    dbt 00010000b
+                      000061 |
+                      000062 |
+                      000063 |
+      0263            000064 |Delay:
+                      000065 |;Save registers on the stack.
+      0263 48         000066 |	pha
+      0264 8A         000067 |	txa
+      0265 48         000068 |	pha
+      0266 98         000069 |	tya
+      0267 48         000070 |	pha
+                      000071 |	
+                      000072 |;Change the number that is being loaded into the
+                      000073 |; 'A' register in order to change the delay time.
+      0268 A9 01      000074 |	lda #01h
+                      000075 |	
+      026A            000076 |OutLoop:
+      026A A2 FE      000077 |	ldx #0fEh
+                      000078 |	
+      026C            000079 |InLoop1:
+      026C A0 FF      000080 |	ldy #0ffh
+                      000081 |	
+      026E            000082 |InLoop2:
+      026E 88         000083 |	dey
+      026F D0 FD      000084 |	bne InLoop2
+                      000085 |	
+      0271 CA         000086 |	dex
+      0272 D0 F8      000087 |	bne InLoop1
+                      000088 |	
+      0274 38         000089 |	sec
+      0275 E9 01      000090 |	sbc #1d
+      0277 D0 F1      000091 |	bne OutLoop
+                      000092 |	
+                      000093 |;Restore registers from the stack.
+      0279 68         000094 |	pla
+      027A A8         000095 |	tay
+      027B 68         000096 |	pla
+      027C AA         000097 |	tax
+      027D 68         000098 |	pla
+                      000099 |
+      027E 60         000100 |	rts
+                      000101 |	
+                      000102 |finish: end
+      
+      *** Symbol Table ***
+      {DELAY=611, INCMSB=595, RESET=578, MAIN=512, MSBITS=610, FINISH=639, INLOOP2=622, INLOOP1=620, DECREASE=548, OUTLOOP=618, =0, LSBITS=609, INCLSB=591}
+.   %/output
+
+3.)
+%uasm65,title="Even To Odd"
+;done
+    org 0200h
+    
+main:
+    ;load bits to 0a200h in memory
+    lda bits
+    sta 0a200h
+    jsr delay
+    clc
+    rol bits ;shift bits left
+    lda bits
+    sta 0a200h
+    jsr delay ;wait
+    clc
+    ror bits ;shift bits right
+    lda 0a600h
+    cmp #1d ;check if switch 1 is toggled to exit
+    beq finish
+    jmp main
+    
+
+bits:
+    dbt 01010101b
+
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0fEh
+	
+InLoop1:
+	ldy #0ffh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+finish: end
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200AD24028D00A2202502182E2402AD24028D00A2200F
+      	S11702142502186E2402AD00A6C901F0204C000255488A4815
+      	S11702289848A901A2FEA0FF88D0FDCAD0F838E901D0F168C3
+      	S108023CA868AA686037
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |;done
+      0200            000002 |    org 0200h
+                      000003 |    
+      0200            000004 |main:
+                      000005 |    ;load bits to 0a200h in memory
+      0200 AD 24 02   000006 |    lda bits
+      0203 8D 00 A2   000007 |    sta 0a200h
+      0206 20 25 02   000008 |    jsr delay
+      0209 18         000009 |    clc
+      020A 2E 24 02   000010 |    rol bits ;shift bits left
+      020D AD 24 02   000011 |    lda bits
+      0210 8D 00 A2   000012 |    sta 0a200h
+      0213 20 25 02   000013 |    jsr delay ;wait
+      0216 18         000014 |    clc
+      0217 6E 24 02   000015 |    ror bits ;shift bits right
+      021A AD 00 A6   000016 |    lda 0a600h
+      021D C9 01      000017 |    cmp #1d ;check if switch 1 is toggled to exit
+      021F F0 20      000018 |    beq finish
+      0221 4C 00 02   000019 |    jmp main
+                      000020 |    
+                      000021 |
+      0224            000022 |bits:
+      0224 55         000023 |    dbt 01010101b
+                      000024 |
+      0225            000025 |Delay:
+                      000026 |;Save registers on the stack.
+      0225 48         000027 |	pha
+      0226 8A         000028 |	txa
+      0227 48         000029 |	pha
+      0228 98         000030 |	tya
+      0229 48         000031 |	pha
+                      000032 |	
+                      000033 |;Change the number that is being loaded into the
+                      000034 |; 'A' register in order to change the delay time.
+      022A A9 01      000035 |	lda #01h
+                      000036 |	
+      022C            000037 |OutLoop:
+      022C A2 FE      000038 |	ldx #0fEh
+                      000039 |	
+      022E            000040 |InLoop1:
+      022E A0 FF      000041 |	ldy #0ffh
+                      000042 |	
+      0230            000043 |InLoop2:
+      0230 88         000044 |	dey
+      0231 D0 FD      000045 |	bne InLoop2
+                      000046 |	
+      0233 CA         000047 |	dex
+      0234 D0 F8      000048 |	bne InLoop1
+                      000049 |	
+      0236 38         000050 |	sec
+      0237 E9 01      000051 |	sbc #1d
+      0239 D0 F1      000052 |	bne OutLoop
+                      000053 |	
+                      000054 |;Restore registers from the stack.
+      023B 68         000055 |	pla
+      023C A8         000056 |	tay
+      023D 68         000057 |	pla
+      023E AA         000058 |	tax
+      023F 68         000059 |	pla
+                      000060 |
+      0240 60         000061 |	rts
+                      000062 |	
+                      000063 |finish: end
+      
+      *** Symbol Table ***
+      {INLOOP1=558, OUTLOOP=556, FINISH=577, BITS=548, DELAY=549, MAIN=512, INLOOP2=560, =0}
+.   %/output
+
+4.)
+%uasm65,title="0->7 then back and repeat"
+;done
+
+    org 0200h
+    
+main: ;move bits forward
+    lda 0a600h
+    cmp #1d
+    beq finish
+    lda bits
+    sta 0a200h
+    jsr delay
+    lda bits
+    cmp #10000000b
+    beq decrease
+    clc
+    rol bits
+    jmp main
+    
+decrease: ;move bits back
+    lda 0a600h
+    cmp #1d
+    beq finish
+    clc
+    ror bits
+    lda bits
+    cmp #1b
+    beq main
+    sta 0a200h
+    jsr delay
+    jmp decrease
+    
+
+bits: ;bits to shift
+    dbt 1b
+    
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0fEh
+	
+InLoop1:
+	ldy #0ffh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+finish: end
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200AD00A6C901F04FAD39028D00A2203A02AD3902C966
+      	S117021480F007182E39024C0002AD00A6C901F031186E398F
+      	S117022802AD3902C901F0D08D00A2203A024C1E0201488A80
+      	S117023C489848A901A2FEA0FF88D0FDCAD0F838E901D0F1CF
+      	S109025068A868AA6860BA
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+                      000001 |
+      0200            000002 |    org 0200h
+                      000003 |    
+      0200            000004 |main:
+      0200 AD 00 A6   000005 |    lda 0a600h
+      0203 C9 01      000006 |    cmp #1d
+      0205 F0 4F      000007 |    beq finish
+      0207 AD 39 02   000008 |    lda bits
+      020A 8D 00 A2   000009 |    sta 0a200h
+      020D 20 3A 02   000010 |    jsr delay
+      0210 AD 39 02   000011 |    lda bits
+      0213 C9 80      000012 |    cmp #10000000b
+      0215 F0 07      000013 |    beq decrease
+      0217 18         000014 |    clc
+      0218 2E 39 02   000015 |    rol bits
+      021B 4C 00 02   000016 |    jmp main
+                      000017 |    
+      021E            000018 |decrease:
+      021E AD 00 A6   000019 |    lda 0a600h
+      0221 C9 01      000020 |    cmp #1d
+      0223 F0 31      000021 |    beq finish
+      0225 18         000022 |    clc
+      0226 6E 39 02   000023 |    ror bits
+      0229 AD 39 02   000024 |    lda bits
+      022C C9 01      000025 |    cmp #1b
+      022E F0 D0      000026 |    beq main
+      0230 8D 00 A2   000027 |    sta 0a200h
+      0233 20 3A 02   000028 |    jsr delay
+      0236 4C 1E 02   000029 |    jmp decrease
+                      000030 |    
+                      000031 |
+      0239            000032 |bits:
+      0239 01         000033 |    dbt 1b
+                      000034 |    
+      023A            000035 |Delay:
+                      000036 |;Save registers on the stack.
+      023A 48         000037 |	pha
+      023B 8A         000038 |	txa
+      023C 48         000039 |	pha
+      023D 98         000040 |	tya
+      023E 48         000041 |	pha
+                      000042 |	
+                      000043 |;Change the number that is being loaded into the
+                      000044 |; 'A' register in order to change the delay time.
+      023F A9 01      000045 |	lda #01h
+                      000046 |	
+      0241            000047 |OutLoop:
+      0241 A2 FE      000048 |	ldx #0fEh
+                      000049 |	
+      0243            000050 |InLoop1:
+      0243 A0 FF      000051 |	ldy #0ffh
+                      000052 |	
+      0245            000053 |InLoop2:
+      0245 88         000054 |	dey
+      0246 D0 FD      000055 |	bne InLoop2
+                      000056 |	
+      0248 CA         000057 |	dex
+      0249 D0 F8      000058 |	bne InLoop1
+                      000059 |	
+      024B 38         000060 |	sec
+      024C E9 01      000061 |	sbc #1d
+      024E D0 F1      000062 |	bne OutLoop
+                      000063 |	
+                      000064 |;Restore registers from the stack.
+      0250 68         000065 |	pla
+      0251 A8         000066 |	tay
+      0252 68         000067 |	pla
+      0253 AA         000068 |	tax
+      0254 68         000069 |	pla
+                      000070 |
+      0255 60         000071 |	rts
+                      000072 |	
+                      000073 |finish: end
+      
+      *** Symbol Table ***
+      {DELAY=570, MAIN=512, FINISH=598, INLOOP2=581, INLOOP1=579, DECREASE=542, BITS=569, OUTLOOP=577, =0}
+.   %/output
+
+5.)
+%uasm65,title="bits 0 and 7 to 3 and 4 then back"
+;done
+
+    org 0200h
+    
+main:
+    lda 0a600h ;check if exit
+    cmp #1d
+    beq finish
+    lda lsb
+    clc
+    adc msb
+    cmp #00011000b
+    beq returnBits
+    sta 0a200h
+    jsr delay
+    clc
+    rol lsb
+    clc
+    ror msb
+    jmp main
+    
+returnBits:
+    lda 0a600h ;check if exit
+    cmp #1d
+    beq finish
+    lda lsb
+    clc
+    adc msb
+    cmp #10000001b
+    beq main
+    sta 0a200h
+    jsr delay
+    clc
+    ror lsb
+    clc
+    rol msb
+    jmp returnBits
+
+lsb: dbt 1b
+msb: dbt 10000000b
+
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #0fEh
+	
+InLoop1:
+	ldy #0ffh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+finish: end ;exit
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200AD00A6C901F05DAD4602186D4702C918F0118D004A
+      	S1170214A2204802182E4602186E47024C0002AD00A6C901FE
+      	S1170228F03AAD4602186D4702C981F0CB8D00A2204802181B
+      	S117023C6E4602182E47024C23020180488A489848A901A22D
+      	S1170250FEA0FF88D0FDCAD0F838E901D0F168A868AA686045
+      	S103026496
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+                      000001 |
+      0200            000002 |    org 0200h
+                      000003 |    
+      0200            000004 |main:
+      0200 AD 00 A6   000005 |    lda 0a600h ;check if exit
+      0203 C9 01      000006 |    cmp #1d
+      0205 F0 5D      000007 |    beq finish
+      0207 AD 46 02   000008 |    lda lsb
+      020A 18         000009 |    clc
+      020B 6D 47 02   000010 |    adc msb
+      020E C9 18      000011 |    cmp #00011000b
+      0210 F0 11      000012 |    beq returnBits
+      0212 8D 00 A2   000013 |    sta 0a200h
+      0215 20 48 02   000014 |    jsr delay
+      0218 18         000015 |    clc
+      0219 2E 46 02   000016 |    rol lsb
+      021C 18         000017 |    clc
+      021D 6E 47 02   000018 |    ror msb
+      0220 4C 00 02   000019 |    jmp main
+                      000020 |    
+      0223            000021 |returnBits:
+      0223 AD 00 A6   000022 |    lda 0a600h ;check if exit
+      0226 C9 01      000023 |    cmp #1d
+      0228 F0 3A      000024 |    beq finish
+      022A AD 46 02   000025 |    lda lsb
+      022D 18         000026 |    clc
+      022E 6D 47 02   000027 |    adc msb
+      0231 C9 81      000028 |    cmp #10000001b
+      0233 F0 CB      000029 |    beq main
+      0235 8D 00 A2   000030 |    sta 0a200h
+      0238 20 48 02   000031 |    jsr delay
+      023B 18         000032 |    clc
+      023C 6E 46 02   000033 |    ror lsb
+      023F 18         000034 |    clc
+      0240 2E 47 02   000035 |    rol msb
+      0243 4C 23 02   000036 |    jmp returnBits
+                      000037 |
+      0246 01         000038 |lsb: dbt 1b
+      0247 80         000039 |msb: dbt 10000000b
+                      000040 |
+      0248            000041 |Delay:
+                      000042 |;Save registers on the stack.
+      0248 48         000043 |	pha
+      0249 8A         000044 |	txa
+      024A 48         000045 |	pha
+      024B 98         000046 |	tya
+      024C 48         000047 |	pha
+                      000048 |	
+                      000049 |;Change the number that is being loaded into the
+                      000050 |; 'A' register in order to change the delay time.
+      024D A9 01      000051 |	lda #01h
+                      000052 |	
+      024F            000053 |OutLoop:
+      024F A2 FE      000054 |	ldx #0fEh
+                      000055 |	
+      0251            000056 |InLoop1:
+      0251 A0 FF      000057 |	ldy #0ffh
+                      000058 |	
+      0253            000059 |InLoop2:
+      0253 88         000060 |	dey
+      0254 D0 FD      000061 |	bne InLoop2
+                      000062 |	
+      0256 CA         000063 |	dex
+      0257 D0 F8      000064 |	bne InLoop1
+                      000065 |	
+      0259 38         000066 |	sec
+      025A E9 01      000067 |	sbc #1d
+      025C D0 F1      000068 |	bne OutLoop
+                      000069 |	
+                      000070 |;Restore registers from the stack.
+      025E 68         000071 |	pla
+      025F A8         000072 |	tay
+      0260 68         000073 |	pla
+      0261 AA         000074 |	tax
+      0262 68         000075 |	pla
+                      000076 |
+      0263 60         000077 |	rts
+                      000078 |	
+                      000079 |finish: end ;exit
+      
+      *** Symbol Table ***
+      {DELAY=584, MAIN=512, FINISH=612, INLOOP2=595, INLOOP1=593, RETURNBITS=547, LSB=582, OUTLOOP=591, =0, MSB=583}
+.   %/output
+
+6.)
+%uasm65,title="0x0h to 0x0ffh then restart"
+;done
+
+    org 0200h
+    
+main:
+    lda 0a600h ;check if exit
+    cmp #1d
+    beq finish
+    lda bits
+    cmp #11111111b ;0x0ff hex
+    beq reset
+    sta 0a200h
+    jsr delay
+    inc bits
+    jmp main
+
+reset:
+    lda #00000000b
+    sta bits
+    jmp main
+
+bits: dbt 0b
+
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #01h
+	
+OutLoop:
+	ldx #00fh
+	
+InLoop1:
+	ldy #0dfh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+finish: end ;exit
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200AD00A6C901F038AD2202C9FFF00C8D00A220230298
+      	S1170214EE22024C0002A9008D22024C000200488A489848D0
+      	S1170228A901A20FA0DF88D0FDCAD0F838E901D0F168A868A2
+      	S106023CAA686049
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+                      000001 |
+      0200            000002 |    org 0200h
+                      000003 |    
+      0200            000004 |main:
+      0200 AD 00 A6   000005 |    lda 0a600h ;check if exit
+      0203 C9 01      000006 |    cmp #1d
+      0205 F0 38      000007 |    beq finish
+      0207 AD 22 02   000008 |    lda bits
+      020A C9 FF      000009 |    cmp #11111111b
+      020C F0 0C      000010 |    beq reset
+      020E 8D 00 A2   000011 |    sta 0a200h
+      0211 20 23 02   000012 |    jsr delay
+      0214 EE 22 02   000013 |    inc bits
+      0217 4C 00 02   000014 |    jmp main
+                      000015 |
+      021A            000016 |reset:
+      021A A9 00      000017 |    lda #00000000b
+      021C 8D 22 02   000018 |    sta bits
+      021F 4C 00 02   000019 |    jmp main
+                      000020 |
+      0222 00         000021 |bits: dbt 0b
+                      000022 |
+      0223            000023 |Delay:
+                      000024 |;Save registers on the stack.
+      0223 48         000025 |	pha
+      0224 8A         000026 |	txa
+      0225 48         000027 |	pha
+      0226 98         000028 |	tya
+      0227 48         000029 |	pha
+                      000030 |	
+                      000031 |;Change the number that is being loaded into the
+                      000032 |; 'A' register in order to change the delay time.
+      0228 A9 01      000033 |	lda #01h
+                      000034 |	
+      022A            000035 |OutLoop:
+      022A A2 0F      000036 |	ldx #00fh
+                      000037 |	
+      022C            000038 |InLoop1:
+      022C A0 DF      000039 |	ldy #0dfh
+                      000040 |	
+      022E            000041 |InLoop2:
+      022E 88         000042 |	dey
+      022F D0 FD      000043 |	bne InLoop2
+                      000044 |	
+      0231 CA         000045 |	dex
+      0232 D0 F8      000046 |	bne InLoop1
+                      000047 |	
+      0234 38         000048 |	sec
+      0235 E9 01      000049 |	sbc #1d
+      0237 D0 F1      000050 |	bne OutLoop
+                      000051 |	
+                      000052 |;Restore registers from the stack.
+      0239 68         000053 |	pla
+      023A A8         000054 |	tay
+      023B 68         000055 |	pla
+      023C AA         000056 |	tax
+      023D 68         000057 |	pla
+                      000058 |
+      023E 60         000059 |	rts
+                      000060 |	
+                      000061 |finish: end ;exit
+      
+      *** Symbol Table ***
+      {DELAY=547, RESET=538, MAIN=512, FINISH=575, INLOOP2=558, INLOOP1=556, BITS=546, OUTLOOP=554, =0}
+.   %/output
+
+7.)
+%uasm65,title="20HZ square wave on PA0"
+;done
+	org 0200h
+	
+Main:
+    lda 0a600h ;check if exit code
+    cmp #1d
+    beq finish
+    
+	inc 0a200h ;Light On
+	jsr delay
+
+	dec 0a200h ;Light Off
+	jsr delay
+	
+	jmp Main
+	
+;Exit the program.
+	brk
+	
+	
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+;microseconds are 1millionth of a second so the 9th decimal place
+;get microseconds by multiplying regristry's a,x,and y.
+;255*255=65025microsends which is 6.5025e-5
+	lda #04h
+	
+OutLoop:
+	ldx #03h
+	
+InLoop1:
+	ldy #0feh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	
+	dex
+	bne InLoop1
+	
+	sec
+	sbc #1d
+	bne OutLoop
+	
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+	
+finish: end ;exit code
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200AD00A6C901F02CEE00A2201702CE00A22017024CEF
+      	S1170214000200488A489848A904A203A0FE88D0FDCAD0F8FF
+      	S10E022838E901D0F168A868AA6860FA
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+                      000001 |;done
+      0200            000002 |	org 0200h
+                      000003 |	
+      0200            000004 |Main:
+      0200 AD 00 A6   000005 |    lda 0a600h ;check if exit code
+      0203 C9 01      000006 |    cmp #1d
+      0205 F0 2C      000007 |    beq finish
+                      000008 |    
+      0207 EE 00 A2   000009 |	inc 0a200h ;Light On
+      020A 20 17 02   000010 |	jsr delay
+                      000011 |
+      020D CE 00 A2   000012 |	dec 0a200h ;Light Off
+      0210 20 17 02   000013 |	jsr delay
+                      000014 |	
+      0213 4C 00 02   000015 |	jmp Main
+                      000016 |	
+                      000017 |;Exit the program.
+      0216 00         000018 |	brk
+                      000019 |	
+                      000020 |	
+      0217            000021 |Delay:
+                      000022 |;Save registers on the stack.
+      0217 48         000023 |	pha
+      0218 8A         000024 |	txa
+      0219 48         000025 |	pha
+      021A 98         000026 |	tya
+      021B 48         000027 |	pha
+                      000028 |	
+                      000029 |;Change the number that is being loaded into the
+                      000030 |; 'A' register in order to change the delay time.
+                      000031 |;microseconds are 1millionth of a second so the 9th decimal place
+                      000032 |;get microseconds by multiplying regristry's a,x,and y.
+                      000033 |;255*255=65025microsends which is 6.5025e-5
+      021C A9 04      000034 |	lda #04h
+                      000035 |	
+      021E            000036 |OutLoop:
+      021E A2 03      000037 |	ldx #03h
+                      000038 |	
+      0220            000039 |InLoop1:
+      0220 A0 FE      000040 |	ldy #0feh
+                      000041 |	
+      0222            000042 |InLoop2:
+      0222 88         000043 |	dey
+      0223 D0 FD      000044 |	bne InLoop2
+                      000045 |	
+      0225 CA         000046 |	dex
+      0226 D0 F8      000047 |	bne InLoop1
+                      000048 |	
+      0228 38         000049 |	sec
+      0229 E9 01      000050 |	sbc #1d
+      022B D0 F1      000051 |	bne OutLoop
+                      000052 |	
+                      000053 |;Restore registers from the stack.
+      022D 68         000054 |	pla
+      022E A8         000055 |	tay
+      022F 68         000056 |	pla
+      0230 AA         000057 |	tax
+      0231 68         000058 |	pla
+                      000059 |
+      0232 60         000060 |	rts
+                      000061 |	
+                      000062 |finish: end ;exit code
+      
+      *** Symbol Table ***
+      {INLOOP1=544, OUTLOOP=542, FINISH=563, DELAY=535, MAIN=512, INLOOP2=546, =0}
+.   %/output
+

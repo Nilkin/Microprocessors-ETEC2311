@@ -1,0 +1,342 @@
+1.);done
+%uasm65,title="use/adjust Motor"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 1d
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+
+;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    lda motorOn     ;is motor on? cmps with 0 by def
+    bne running
+    
+    lda 0a600h
+    eor #111111b    ;switches idle high
+    cmp #1b         ;switch1
+    beq start
+    cmp #100b       ;switch3
+    beq toggleMax
+    cmp #1000b      ;switch4
+    beq toggleMin
+    
+    jmp continue
+    
+start:
+    inc motorOn
+    jmp continue
+    
+toggleMax:
+    lda maxPow
+    bne continue    ;is it already maxPower?
+    
+    inc maxPow
+    lda #0d         ;no set power to max
+    sta timing      ;make timer 0 for max
+    jmp continue
+    
+toggleMin:
+    lda maxPow
+    beq continue    ;maxPow already off for min
+    
+    dec maxPow
+    lda quarTime
+    sta timing
+    jmp continue
+    
+running:
+    lda 0a600h
+    eor #111111b    ;switches idle high
+    cmp #10b        ;switch2
+    beq stop
+    cmp #100b       ;switch3
+    beq toggleMax
+    cmp #1000b      ;switch4
+    beq toggleMin
+    
+    lda maxPow      ;should be 0 for off
+    bne toggleMotor ;maxPower on? cmps with 0 by def
+    
+    lda minPow
+    beq resetST     ;second?
+    
+    lda timing
+    beq decQT       ;quarterSecond?
+    dec timing
+    
+    jmp continue
+    
+decQT:
+    dec minPow
+    lda quarTime
+    sta timing
+    jmp continue
+    
+resetST:
+    lda #4d
+    sta minPow      ;reset secTimer
+    lda quarTime
+    sta timing      ;reset quarTimer
+    jmp toggleMotor
+    
+toggleMotor:
+    lda 0a200h
+    eor #1b
+    sta 0a200h
+    jmp continue
+    
+stop:
+    dec motorOn     ;turn motor off
+    jmp continue
+    
+continue:
+;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+    
+timing: dbt 0d
+    
+motorOn: dbt 0d ;not on bydefault
+    
+maxPow: dbt 0d  ;not on bydefault
+    
+quarTime: dbt 250d
+
+minPow: dbt 4d  ;1second
+
+    
+    end
+
+%/uasm65
+
+    %output,mpversion=".257",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9008D0EB0A9C08D0BB0A9018D06B0A9008D07B067
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848ADC802D03BAD00A6493FC901F00B9A
+      	S117023CC904F00DC908F0194CBF02EEC8024CBF02ADC902BC
+      	S1170250D06DEEC902A9008DC7024CBF02ADC902F05DCEC938
+      	S117026402ADCA028DC7024CBF02AD00A6493FC902F042C903
+      	S117027804F0D2C908F0DEADC902D02AADCB02F017ADC702A0
+      	S117028CF006CEC7024CBF02CECB02ADCA028DC7024CBF0249
+      	S11702A0A9048DCB02ADCA028DC7024CAE02AD00A249018D4E
+      	S11702B400A24CBF02CEC8024CBF0268A868AA682858400094
+      	S10702C80000FA0430
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 1d
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 01      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 00      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |
+                      000042 |;Save registers on the stack.
+      0228 08         000043 |    php
+      0229 48         000044 |    pha
+      022A 8A         000045 |    txa
+      022B 48         000046 |    pha
+      022C 98         000047 |    tya
+      022D 48         000048 |    pha
+                      000049 |    
+      022E AD C8 02   000050 |    lda motorOn     ;is motor on? cmps with 0 by def
+      0231 D0 3B      000051 |    bne running
+                      000052 |    
+      0233 AD 00 A6   000053 |    lda 0a600h
+      0236 49 3F      000054 |    eor #111111b    ;switches idle high
+      0238 C9 01      000055 |    cmp #1b         ;switch1
+      023A F0 0B      000056 |    beq start
+      023C C9 04      000057 |    cmp #100b       ;switch3
+      023E F0 0D      000058 |    beq toggleMax
+      0240 C9 08      000059 |    cmp #1000b      ;switch4
+      0242 F0 19      000060 |    beq toggleMin
+                      000061 |    
+      0244 4C BF 02   000062 |    jmp continue
+                      000063 |    
+      0247            000064 |start:
+      0247 EE C8 02   000065 |    inc motorOn
+      024A 4C BF 02   000066 |    jmp continue
+                      000067 |    
+      024D            000068 |toggleMax:
+      024D AD C9 02   000069 |    lda maxPow
+      0250 D0 6D      000070 |    bne continue    ;is it already maxPower?
+                      000071 |    
+      0252 EE C9 02   000072 |    inc maxPow
+      0255 A9 00      000073 |    lda #0d         ;no set power to max
+      0257 8D C7 02   000074 |    sta timing      ;make timer 0 for max
+      025A 4C BF 02   000075 |    jmp continue
+                      000076 |    
+      025D            000077 |toggleMin:
+      025D AD C9 02   000078 |    lda maxPow
+      0260 F0 5D      000079 |    beq continue    ;maxPow already off for min
+                      000080 |    
+      0262 CE C9 02   000081 |    dec maxPow
+      0265 AD CA 02   000082 |    lda quarTime
+      0268 8D C7 02   000083 |    sta timing
+      026B 4C BF 02   000084 |    jmp continue
+                      000085 |    
+      026E            000086 |running:
+      026E AD 00 A6   000087 |    lda 0a600h
+      0271 49 3F      000088 |    eor #111111b    ;switches idle high
+      0273 C9 02      000089 |    cmp #10b        ;switch2
+      0275 F0 42      000090 |    beq stop
+      0277 C9 04      000091 |    cmp #100b       ;switch3
+      0279 F0 D2      000092 |    beq toggleMax
+      027B C9 08      000093 |    cmp #1000b      ;switch4
+      027D F0 DE      000094 |    beq toggleMin
+                      000095 |    
+      027F AD C9 02   000096 |    lda maxPow      ;should be 0 for off
+      0282 D0 2A      000097 |    bne toggleMotor ;maxPower on? cmps with 0 by def
+                      000098 |    
+      0284 AD CB 02   000099 |    lda minPow
+      0287 F0 17      000100 |    beq resetST     ;second?
+                      000101 |    
+      0289 AD C7 02   000102 |    lda timing
+      028C F0 06      000103 |    beq decQT       ;quarterSecond?
+      028E CE C7 02   000104 |    dec timing
+                      000105 |    
+      0291 4C BF 02   000106 |    jmp continue
+                      000107 |    
+      0294            000108 |decQT:
+      0294 CE CB 02   000109 |    dec minPow
+      0297 AD CA 02   000110 |    lda quarTime
+      029A 8D C7 02   000111 |    sta timing
+      029D 4C BF 02   000112 |    jmp continue
+                      000113 |    
+      02A0            000114 |resetST:
+      02A0 A9 04      000115 |    lda #4d
+      02A2 8D CB 02   000116 |    sta minPow      ;reset secTimer
+      02A5 AD CA 02   000117 |    lda quarTime
+      02A8 8D C7 02   000118 |    sta timing      ;reset quarTimer
+      02AB 4C AE 02   000119 |    jmp toggleMotor
+                      000120 |    
+      02AE            000121 |toggleMotor:
+      02AE AD 00 A2   000122 |    lda 0a200h
+      02B1 49 01      000123 |    eor #1b
+      02B3 8D 00 A2   000124 |    sta 0a200h
+      02B6 4C BF 02   000125 |    jmp continue
+                      000126 |    
+      02B9            000127 |stop:
+      02B9 CE C8 02   000128 |    dec motorOn     ;turn motor off
+      02BC 4C BF 02   000129 |    jmp continue
+                      000130 |    
+      02BF            000131 |continue:
+                      000132 |;Restore registers from the stack.
+      02BF 68         000133 |    pla
+      02C0 A8         000134 |    tay
+      02C1 68         000135 |    pla
+      02C2 AA         000136 |    tax
+      02C3 68         000137 |    pla
+      02C4 28         000138 |    plp
+                      000139 |
+      02C5 58         000140 |    cli    ; Enable interrupts.
+                      000141 |   
+      02C6 40         000142 |    rti    ; Return from interrupt.
+                      000143 |    
+      02C7 00         000144 |timing: dbt 0d
+                      000145 |    
+      02C8 00         000146 |motorOn: dbt 0d ;not on bydefault
+                      000147 |    
+      02C9 00         000148 |maxPow: dbt 0d  ;not on bydefault
+                      000149 |    
+      02CA FA         000150 |quarTime: dbt 250d
+                      000151 |
+      02CB 04         000152 |minPow: dbt 4d  ;1second
+                      000153 |
+                      000154 |    
+                      000155 |    end
+      
+      *** Symbol Table ***
+      {STOP=697, ACR=45067, TOGGLEMOTOR=686, CONTINUE=703, DECQT=660, TIMING=711, IER=45070, INTERRUPTHANDLER=552, RUNNING=622, IRQVECT=2, MINPOW=715, COUNTDOWN=1, TOGGLEMIN=605, MOTORON=712, TOGGLEMAX=589, MAINLOOP=548, QUARTIME=714, MAXPOW=713, START=583, T1LL=45062, RESETST=672, T1LH=45063, =0}
+.   %/output
+
+2.)

@@ -1,0 +1,191 @@
+Assignment 1. v.03.
+
+
+Enter your name in the following fold.
+%info
+
+Thomas Gilman
+
+%/info
+
+
+======================================================================
+Program 1 (15 points).
+
+Write a program that will copy the 100 bytes that start at "source"
+to "destination".
+
+%uasm65,title="Program1"
+	org 0200h
+var:
+	dbt 0d;
+	
+main:
+;Place your program code here.
+	lda var;
+	cmp 100d
+	bne moveBits;
+	jmp finish;
+
+moveBits:
+	sta var;
+	ldx var;
+	inx var;
+	stx var
+	lda source;
+	sta destination;
+	jmp main;
+	
+	
+
+finish:
+	end;
+
+
+source:
+	dbt 59d,61d,37d,128d,71d,150d,195d,130d,69d,84d
+	dbt 171d,227d,99d,214d,233d,136d,80d,253d,242d
+	dbt 112d,221d,151d,101d,117d,76d,226d,174d,205d
+	dbt 84d,78d,139d,89d,195d,243d,69d,128d,217d,215d
+	dbt 57d,100d,227d,226d,233d,238d,229d,228d,135d
+	dbt 140d,98d,211d,245d,120d,206d,198d,47d,191d
+	dbt 239d,27d,236d,12d,242d,148d,98d,11d,38d,189d
+	dbt 238d,225d,142d,214d,214d,21d,75d,17d,190d
+	dbt 178d,123d,125d,123d,10d,166d,123d,135d,220d
+	dbt 193d,46d,248d,222d,63d,206d,197d,101d,144d
+	dbt 201d,233d,12d,241d,85d,180d,29d
+	
+destination:
+	dbt 100d(0d)
+
+	end
+
+%/uasm65
+
+
+
+
+======================================================================
+Program 2 (15 points).
+
+Write a program that will capitalize all the letters in the string 
+that starts at "string1".
+
+%uasm65,title=""
+	org 0200h
+
+main:
+;Place your program code here.
+
+
+string1:
+	dbt "A bird in the hand is worth two in the bush. Early to bed and "
+	dbt "early to rise makes a person healthy, wealthy, and wise."
+	dbt 0d
+	
+	end
+%/uasm65
+
+
+
+
+======================================================================
+Program 3 (15 points).
+
+Write a program that exchanges the upper and lower nibbles in the 
+100 bytes that begin at "numbers".
+
+%uasm65,title=""
+	org 0200h
+
+main:
+;Place your program code here.
+
+
+numbers:
+	dbt 1Fh,4Dh,38h,4Ch,23h,D9h,FCh,36h,CFh,17h,35h,70h
+	dbt 8Fh,9Eh,20h,9Bh,27h,2Ch,7Bh,30h,E4h,7Ch,9Bh,89h
+	dbt EAh,78h,A0h,52h,28h,D5h,DCh,69h,88h,75h,80h,7Dh
+	dbt D7h,55h,9Dh,BCh,12h,D2h,7Fh,DEh,92h,11h,8Ah,E6h
+	dbt AFh,5Eh,89h,D4h,92h,5Ah,A2h,B8h,BBh,B6h,D8h,54h
+	dbt DBh,5Dh,58h,B9h,7Eh,CDh,72h,19h,2Ch,7Ch,77h,30h
+	dbt 7Ch,19h,6Eh,89h,B5h,66h,C2h,EFh,89h,96h,F3h,63h
+	dbt 82h,F0h,56h,DCh,9Ah,7Eh,FCh,29h,B4h,B3h,CDh,3Dh
+	dbt 58h,BEh,DCh,44h
+
+	end
+
+%/uasm65
+
+
+
+
+======================================================================
+Program 4 (15 points).
+
+Write a program that contains a subroutine that prints the string
+"A stitch in time saves nine." Have the main program call the subroutine
+3 times.
+
+
+%uasm65,title=""
+	org 0200h
+
+main:
+;Place your program code here.
+
+
+
+	end
+
+%/uasm65
+
+
+
+
+======================================================================
+Program 5 (15 points).
+
+Write a program that will sort the 100 integers starting at "numbers"
+into ascending order.
+
+%uasm65,title=""
+	org 0200h
+
+main:
+;Place your program code here.
+
+
+numbers:
+	dbt 59d,61d,37d,128d,71d,150d,195d,130d,69d,84d
+	dbt 171d,227d,99d,214d,233d,136d,80d,253d,242d
+	dbt 112d,221d,151d,101d,117d,76d,226d,174d,205d
+	dbt 84d,78d,139d,89d,195d,243d,69d,128d,217d,215d
+	dbt 57d,100d,227d,226d,233d,238d,229d,228d,135d
+	dbt 140d,98d,211d,245d,120d,206d,198d,47d,191d
+	dbt 239d,27d,236d,12d,242d,148d,98d,11d,38d,189d
+	dbt 238d,225d,142d,214d,214d,21d,75d,17d,190d
+	dbt 178d,123d,125d,123d,10d,166d,123d,135d,220d
+	dbt 193d,46d,248d,222d,63d,206d,197d,101d,144d
+	dbt 201d,233d,12d,241d,85d,180d,29d
+
+	end
+
+%/uasm65
+
+
+
+======================================================================
+Program 6 (25 points).
+
+Write a program that enables the user to use some of the switches that
+are at memory location A600 to move a single light around the 8x2 grid
+of LEDs that are formed by memory locations A200h and A400h.
+
+%uasm65,title=""
+	org 0200h
+
+
+	end
+
+%/uasm65

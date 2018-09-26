@@ -1,0 +1,718 @@
+;Thomas Gilman
+;Microprocessor Based Systems
+;2/22/18
+;assignment 4 Interrupt Handler 
+1.)
+%uasm65,title="print hello every second and there when IRQ"
+
+PrntMess: equ E00Ch
+
+IRQVect: equ 0002d
+
+
+
+    org 0200h
+
+; ======= Initialization.
+    ; Point the IRQ vector to the
+    ; interrupt handler.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+    
+    ; Enable interrupts.
+    cli
+    
+; ======= Main program
+Loop:
+    ldx #Greeting<
+    ldy #Greeting>
+    jsr Delay
+    jsr PrntMess
+    jmp Loop
+    
+    
+; ======= Interrupt Handler
+InterruptHandler:
+    ldx #Position<
+    ldy #Position>
+    jsr PrntMess
+    
+    ; Enable interrupts.
+    cli
+    
+    rti
+    
+Delay:
+;Save registers on the stack.
+	pha
+	txa
+	pha
+	tya
+	pha
+	
+;Change the number that is being loaded into the
+; 'A' register in order to change the delay time.
+	lda #02h
+	
+OutLoop:
+	ldx #0dfh
+	
+InLoop1:
+	ldy #0dfh
+	
+InLoop2:
+	dey
+	bne InLoop2
+	dex
+	bne InLoop1
+	sec
+	sbc #1d
+	bne OutLoop
+;Restore registers from the stack.
+	pla
+	tay
+	pla
+	tax
+	pla
+
+	rts
+    
+Greeting:
+    dbt 0ah,0dh
+    dbt "Hello"
+    dbt 0d
+    
+Position:
+    dbt 0ah,0dh
+    dbt "There"
+    dbt 0d
+    
+    end
+%/uasm65
+
+    %output,mpversion=".255",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9188D0200A9028D030058A23DA002202102200C13
+      	S1170214E04C0B02A245A002200CE05840488A489848A902C7
+      	S1170228A2DFA0DF88D0FDCAD0F838E901D0F168A868AA686A
+      	S114023C600A0D48656C6C6F000A0D54686572650033
+      	S9030000FC
+      %/s19
+       
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |PrntMess: equ E00Ch
+                      000003 |
+      0000            000004 |IRQVect: equ 0002d
+                      000005 |
+                      000006 |
+                      000007 |
+      0200            000008 |    org 0200h
+                      000009 |
+                      000010 |; ======= Initialization.
+                      000011 |    ; Point the IRQ vector to the
+                      000012 |    ; interrupt handler.
+      0200 A9 18      000013 |    lda #InterruptHandler<
+      0202 8D 02 00   000014 |    sta IRQVect
+      0205 A9 02      000015 |    lda #InterruptHandler>
+      0207 8D 03 00   000016 |    sta IRQVect+1d
+                      000017 |    
+                      000018 |    ; Enable interrupts.
+      020A 58         000019 |    cli
+                      000020 |    
+                      000021 |; ======= Main program
+      020B            000022 |Loop:
+      020B A2 3D      000023 |    ldx #Greeting<
+      020D A0 02      000024 |    ldy #Greeting>
+      020F 20 21 02   000025 |    jsr Delay
+      0212 20 0C E0   000026 |    jsr PrntMess
+      0215 4C 0B 02   000027 |    jmp Loop
+                      000028 |    
+                      000029 |    
+                      000030 |; ======= Interrupt Handler
+      0218            000031 |InterruptHandler:
+      0218 A2 45      000032 |    ldx #Position<
+      021A A0 02      000033 |    ldy #Position>
+      021C 20 0C E0   000034 |    jsr PrntMess
+                      000035 |    
+                      000036 |    ; Enable interrupts.
+      021F 58         000037 |    cli
+                      000038 |    
+      0220 40         000039 |    rti
+                      000040 |    
+      0221            000041 |Delay:
+                      000042 |;Save registers on the stack.
+      0221 48         000043 |	pha
+      0222 8A         000044 |	txa
+      0223 48         000045 |	pha
+      0224 98         000046 |	tya
+      0225 48         000047 |	pha
+                      000048 |	
+                      000049 |;Change the number that is being loaded into the
+                      000050 |; 'A' register in order to change the delay time.
+      0226 A9 02      000051 |	lda #02h
+                      000052 |	
+      0228            000053 |OutLoop:
+      0228 A2 DF      000054 |	ldx #0dfh
+                      000055 |	
+      022A            000056 |InLoop1:
+      022A A0 DF      000057 |	ldy #0dfh
+                      000058 |	
+      022C            000059 |InLoop2:
+      022C 88         000060 |	dey
+      022D D0 FD      000061 |	bne InLoop2
+      022F CA         000062 |	dex
+      0230 D0 F8      000063 |	bne InLoop1
+      0232 38         000064 |	sec
+      0233 E9 01      000065 |	sbc #1d
+      0235 D0 F1      000066 |	bne OutLoop
+                      000067 |;Restore registers from the stack.
+      0237 68         000068 |	pla
+      0238 A8         000069 |	tay
+      0239 68         000070 |	pla
+      023A AA         000071 |	tax
+      023B 68         000072 |	pla
+                      000073 |
+      023C 60         000074 |	rts
+                      000075 |    
+      023D            000076 |Greeting:
+      023D 0A         000077 |    dbt 0ah,0dh
+      023E 0D               
+      023F 48         000078 |    dbt "Hello"
+      0240 65 6C 6C         
+      0243 6F               
+      0244 00         000079 |    dbt 0d
+                      000080 |    
+      0245            000081 |Position:
+      0245 0A         000082 |    dbt 0ah,0dh
+      0246 0D               
+      0247 54         000083 |    dbt "There"
+      0248 68 65 72         
+      024B 65               
+      024C 00         000084 |    dbt 0d
+                      000085 |    
+                      000086 |    end
+      
+      *** Symbol Table ***
+      {PRNTMESS=57356, DELAY=545, IRQVECT=2, LOOP=523, INLOOP2=556, INLOOP1=554, POSITION=581, GREETING=573, OUTLOOP=552, =0, INTERRUPTHANDLER=536}
+.   %/output
+
+2.)
+%uasm65,title="Prnt Hello with timer Interrupt"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 500d
+ 
+IRQVect: equ 0002d
+
+PrntMess: equ 0e00ch
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+
+;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    ldx #Greeting<
+    ldy #Greeting>
+    jsr PrntMess
+
+;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+    
+Greeting:
+    dbt 0ah,0dh
+    dbt "Hello"
+    dbt 0d    
+
+    end
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200A9008D0EB0A9C08D0BB0A9F48D06B0A9018D07B073
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848A23DA002200CE068A868AA68285825
+      	S10C023C400A0D48656C6C6F006A
+      	S9030000FC
+      %/s19
+        
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 500d
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0000            000011 |PrntMess: equ 0e00ch
+                      000012 |
+      0200            000013 |    org 0200h
+                      000014 |     
+      0200 A9 00      000015 |    lda #0d
+                      000016 |   
+      0202 8D 0E B0   000017 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000018 |    lda #11000000b
+      0207 8D 0B B0   000019 |    sta ACR             ; Set to T1 free running mode;
+                      000020 |   
+      020A A9 F4      000021 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000022 |    sta T1LL            ; Low byte of latch.
+      020F A9 01      000023 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000024 |    sta T1LH            ; High byte of latch.
+                      000025 | 
+                      000026 |
+                      000027 |    ; Initialize the interrupt vector.
+      0214 A9 28      000028 |    lda #InterruptHandler<
+      0216 8D 02 00   000029 |    sta IRQVect
+      0219 A9 02      000030 |    lda #InterruptHandler>
+      021B 8D 03 00   000031 |    sta IRQVect+1d
+                      000032 |   
+      021E A9 40      000033 |    lda #01000000b
+      0220 8D 0E B0   000034 |    sta IER        ; Enable all interrupts on the 6522.
+                      000035 |   
+      0223 58         000036 |    cli            ; Enable interrupts
+                      000037 |   
+      0224            000038 |MainLoop:
+      0224 EA         000039 |    nop
+      0225 4C 24 02   000040 |    jmp MainLoop
+                      000041 |   
+      0228            000042 |InterruptHandler:
+                      000043 |
+                      000044 |;Save registers on the stack.
+      0228 08         000045 |    php
+      0229 48         000046 |    pha
+      022A 8A         000047 |    txa
+      022B 48         000048 |    pha
+      022C 98         000049 |    tya
+      022D 48         000050 |    pha
+                      000051 |    
+      022E A2 3D      000052 |    ldx #Greeting<
+      0230 A0 02      000053 |    ldy #Greeting>
+      0232 20 0C E0   000054 |    jsr PrntMess
+                      000055 |
+                      000056 |;Restore registers from the stack.
+      0235 68         000057 |    pla
+      0236 A8         000058 |    tay
+      0237 68         000059 |    pla
+      0238 AA         000060 |    tax
+      0239 68         000061 |    pla
+      023A 28         000062 |    plp
+                      000063 |
+      023B 58         000064 |    cli    ; Enable interrupts.
+                      000065 |   
+      023C 40         000066 |    rti    ; Return from interrupt.
+                      000067 |    
+      023D            000068 |Greeting:
+      023D 0A         000069 |    dbt 0ah,0dh
+      023E 0D               
+      023F 48         000070 |    dbt "Hello"
+      0240 65 6C 6C         
+      0243 6F               
+      0244 00         000071 |    dbt 0d    
+                      000072 |
+                      000073 |    end
+      
+      *** Symbol Table ***
+      {PRNTMESS=57356, T1LH=45063, COUNTDOWN=500, ACR=45067, IER=45070, IRQVECT=2, MAINLOOP=548, GREETING=573, INTERRUPTHANDLER=552, =0, T1LL=45062}
+.   %/output
+
+3.)
+%uasm65,title="inc lower nibble of 0a200h everySecond"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 500d
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+    ;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    inc 0a200h
+
+    ;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+
+    
+    end
+
+%/uasm65
+
+    %output,mpversion=".255",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9008D0EB0A9C08D0BB0A9F48D06B0A9018D07B073
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S114022808488A489848EE00A268A868AA68285840E5
+      	S9030000FC
+      %/s19
+         
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 500d
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 F4      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 01      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |    ;Save registers on the stack.
+      0228 08         000042 |    php
+      0229 48         000043 |    pha
+      022A 8A         000044 |    txa
+      022B 48         000045 |    pha
+      022C 98         000046 |    tya
+      022D 48         000047 |    pha
+                      000048 |    
+      022E EE 00 A2   000049 |    inc 0a200h
+                      000050 |
+                      000051 |    ;Restore registers from the stack.
+      0231 68         000052 |    pla
+      0232 A8         000053 |    tay
+      0233 68         000054 |    pla
+      0234 AA         000055 |    tax
+      0235 68         000056 |    pla
+      0236 28         000057 |    plp
+                      000058 |
+      0237 58         000059 |    cli    ; Enable interrupts.
+                      000060 |   
+      0238 40         000061 |    rti    ; Return from interrupt.
+                      000062 |
+                      000063 |    
+                      000064 |    end
+      
+      *** Symbol Table ***
+      {T1LH=45063, COUNTDOWN=500, ACR=45067, IER=45070, IRQVECT=2, MAINLOOP=548, INTERRUPTHANDLER=552, =0, T1LL=45062}
+.   %/output
+
+4.)
+%uasm65,title="upper nibble half time of lower nibble 0a200h"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 250d
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+    ;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    lda 0a200h
+    clc 
+    adc #10000b
+    sta 0a200h
+    lda lowerBitTimer
+    cmp #0d
+    beq lowerNib
+    dec lowerBitTimer
+    jmp restore
+    
+lowerNib:
+    lda #1d
+    sta lowerBitTimer
+    inc 0a200h
+    jmp restore
+
+restore:
+    ;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+    
+lowerBitTimer:
+    dbt 1d
+
+    
+    end
+
+%/uasm65
+
+    %output,mpversion=".246",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S007000055415347C8
+      	S1170200A9008D0EB0A9C08D0BB0A9FA8D06B0A9008D07B06E
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848AD00A21869108D00A2AD5702C900DE
+      	S117023CF006CE57024C4F02A9018D5702EE00A24C4F0268CB
+      	S10B0250A868AA6828584001BF
+      	S9030000FC
+      %/s19
+        
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 250d
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 FA      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 00      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |    ;Save registers on the stack.
+      0228 08         000042 |    php
+      0229 48         000043 |    pha
+      022A 8A         000044 |    txa
+      022B 48         000045 |    pha
+      022C 98         000046 |    tya
+      022D 48         000047 |    pha
+                      000048 |    
+      022E AD 00 A2   000049 |    lda 0a200h
+      0231 18         000050 |    clc 
+      0232 69 10      000051 |    adc #10000b
+      0234 8D 00 A2   000052 |    sta 0a200h
+      0237 AD 57 02   000053 |    lda lowerBitTimer
+      023A C9 00      000054 |    cmp #0d
+      023C F0 06      000055 |    beq lowerNib
+      023E CE 57 02   000056 |    dec lowerBitTimer
+      0241 4C 4F 02   000057 |    jmp restore
+                      000058 |    
+      0244            000059 |lowerNib:
+      0244 A9 01      000060 |    lda #1d
+      0246 8D 57 02   000061 |    sta lowerBitTimer
+      0249 EE 00 A2   000062 |    inc 0a200h
+      024C 4C 4F 02   000063 |    jmp restore
+                      000064 |
+      024F            000065 |restore:
+                      000066 |    ;Restore registers from the stack.
+      024F 68         000067 |    pla
+      0250 A8         000068 |    tay
+      0251 68         000069 |    pla
+      0252 AA         000070 |    tax
+      0253 68         000071 |    pla
+      0254 28         000072 |    plp
+                      000073 |
+      0255 58         000074 |    cli    ; Enable interrupts.
+                      000075 |   
+      0256 40         000076 |    rti    ; Return from interrupt.
+                      000077 |    
+      0257            000078 |lowerBitTimer:
+      0257 01         000079 |    dbt 1d
+                      000080 |
+                      000081 |    
+                      000082 |    end
+      
+      *** Symbol Table ***
+      {LOWERBITTIMER=599, RESTORE=591, LOWERNIB=580, T1LH=45063, COUNTDOWN=250, ACR=45067, IER=45070, IRQVECT=2, MAINLOOP=548, INTERRUPTHANDLER=552, =0, T1LL=45062}
+.   %/output
+

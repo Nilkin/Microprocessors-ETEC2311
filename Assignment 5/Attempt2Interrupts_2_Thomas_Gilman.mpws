@@ -1,0 +1,1632 @@
+1.);done
+%uasm65,title="Blink per switch press"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 1d     
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+
+;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    lda notBlinking
+    beq curBlinking
+    
+    lda debouncer
+    cmp #0d
+    beq cS
+    dec debouncer
+    jmp continue
+    
+cS:
+    lda #20d
+    sta debouncer
+    
+    lda 0a600h
+    eor #111111b
+    cmp #1b
+    beq incCount        ;is switch0 pressed?
+    cmp #10b
+    bne continue
+    
+    lda 0a200h
+    eor #1b
+    sta 0a200h
+    
+    dec notBlinking     ;switch1 pressed
+    jmp curBlinking
+    
+incCount:
+    inc switchCount     ;inc count for times pressed
+    jmp continue
+    
+curBlinking:
+    lda 0a200h
+    eor #1b             ;toggleLED
+    sta 0a200h
+    
+    lda toggler         ;has it been 1 blink?
+    beq blinkSet
+    dec toggler
+    
+    lda switchCount
+    bne continue
+    
+    lda #1d             ;make sure toggler is reset
+    sta toggler
+    inc notBlinking
+    jmp continue
+    
+blinkSet:
+    inc toggler         ;1 blink
+    dec switchCount     ;decreaseTimes to blink
+    jmp continue
+
+continue:
+;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+    
+debouncer:
+    dbt 20d
+    
+toggler:
+    dbt 1d
+
+notBlinking:
+    dbt 1d
+    
+switchCount:
+    dbt 0d
+
+    end
+
+%/uasm65
+
+    %output,mpversion=".257",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9008D0EB0A9C08D0BB0A9018D06B0A9008D07B067
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848AD9902F033AD9702C900F006CE97E7
+      	S117023C024C8F02A9148D9702AD00A6493FC901F012C90276
+      	S1170250D03DAD00A249018D00A2CE99024C6602EE9A024CCE
+      	S11702648F02AD00A249018D00A2AD9802F013CE9802AD9A30
+      	S117027802D014A9018D9802EE99024C8F02EE9802CE9A025F
+      	S112028C4C8F0268A868AA682858401401010022
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 1d     
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 01      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 00      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |
+                      000042 |;Save registers on the stack.
+      0228 08         000043 |    php
+      0229 48         000044 |    pha
+      022A 8A         000045 |    txa
+      022B 48         000046 |    pha
+      022C 98         000047 |    tya
+      022D 48         000048 |    pha
+                      000049 |    
+      022E AD 99 02   000050 |    lda notBlinking
+      0231 F0 33      000051 |    beq curBlinking
+                      000052 |    
+      0233 AD 97 02   000053 |    lda debouncer
+      0236 C9 00      000054 |    cmp #0d
+      0238 F0 06      000055 |    beq cS
+      023A CE 97 02   000056 |    dec debouncer
+      023D 4C 8F 02   000057 |    jmp continue
+                      000058 |    
+      0240            000059 |cS:
+      0240 A9 14      000060 |    lda #20d
+      0242 8D 97 02   000061 |    sta debouncer
+                      000062 |    
+      0245 AD 00 A6   000063 |    lda 0a600h
+      0248 49 3F      000064 |    eor #111111b
+      024A C9 01      000065 |    cmp #1b
+      024C F0 12      000066 |    beq incCount        ;is switch0 pressed?
+      024E C9 02      000067 |    cmp #10b
+      0250 D0 3D      000068 |    bne continue
+                      000069 |    
+      0252 AD 00 A2   000070 |    lda 0a200h
+      0255 49 01      000071 |    eor #1b
+      0257 8D 00 A2   000072 |    sta 0a200h
+                      000073 |    
+      025A CE 99 02   000074 |    dec notBlinking     ;switch1 pressed
+      025D 4C 66 02   000075 |    jmp curBlinking
+                      000076 |    
+      0260            000077 |incCount:
+      0260 EE 9A 02   000078 |    inc switchCount     ;inc count for times pressed
+      0263 4C 8F 02   000079 |    jmp continue
+                      000080 |    
+      0266            000081 |curBlinking:
+      0266 AD 00 A2   000082 |    lda 0a200h
+      0269 49 01      000083 |    eor #1b             ;toggleLED
+      026B 8D 00 A2   000084 |    sta 0a200h
+                      000085 |    
+      026E AD 98 02   000086 |    lda toggler         ;has it been 1 blink?
+      0271 F0 13      000087 |    beq blinkSet
+      0273 CE 98 02   000088 |    dec toggler
+                      000089 |    
+      0276 AD 9A 02   000090 |    lda switchCount
+      0279 D0 14      000091 |    bne continue
+                      000092 |    
+      027B A9 01      000093 |    lda #1d             ;make sure toggler is reset
+      027D 8D 98 02   000094 |    sta toggler
+      0280 EE 99 02   000095 |    inc notBlinking
+      0283 4C 8F 02   000096 |    jmp continue
+                      000097 |    
+      0286            000098 |blinkSet:
+      0286 EE 98 02   000099 |    inc toggler         ;1 blink
+      0289 CE 9A 02   000100 |    dec switchCount     ;decreaseTimes to blink
+      028C 4C 8F 02   000101 |    jmp continue
+                      000102 |
+      028F            000103 |continue:
+                      000104 |;Restore registers from the stack.
+      028F 68         000105 |    pla
+      0290 A8         000106 |    tay
+      0291 68         000107 |    pla
+      0292 AA         000108 |    tax
+      0293 68         000109 |    pla
+      0294 28         000110 |    plp
+                      000111 |
+      0295 58         000112 |    cli    ; Enable interrupts.
+                      000113 |   
+      0296 40         000114 |    rti    ; Return from interrupt.
+                      000115 |    
+      0297            000116 |debouncer:
+      0297 14         000117 |    dbt 20d
+                      000118 |    
+      0298            000119 |toggler:
+      0298 01         000120 |    dbt 1d
+                      000121 |
+      0299            000122 |notBlinking:
+      0299 01         000123 |    dbt 1d
+                      000124 |    
+      029A            000125 |switchCount:
+      029A 00         000126 |    dbt 0d
+                      000127 |
+                      000128 |    end
+      
+      *** Symbol Table ***
+      {ACR=45067, CS=576, NOTBLINKING=665, SWITCHCOUNT=666, CONTINUE=655, IER=45070, INTERRUPTHANDLER=552, IRQVECT=2, COUNTDOWN=1, TOGGLER=664, INCCOUNT=608, MAINLOOP=548, CURBLINKING=614, BLINKSET=646, DEBOUNCER=663, T1LL=45062, T1LH=45063, =0}
+.   %/output
+
+2.);done
+%uasm65,title="blink 4LEDs at differnet inter"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 500d     ;every half second
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+    ;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    lda lightState
+    EOR #1b         ;LED 0
+    sta lightState
+    lda second
+    cmp #0d
+    beq toggleLED1
+    jmp cont
+    
+toggleLED1:
+    inc second      ;reset second counter
+    dec fiveSecond
+    lda lightState
+    EOR #10b        ;LED 1
+    sta lightState
+    lda fiveSecond
+    cmp #0d
+    beq ToggleLED2
+    jmp cont
+
+toggleLED2:
+    dec tenSecond
+    lda #10d        ;reset 5second counter
+    sta fiveSecond
+    lda lightState
+    EOR #100b       ;LED 2
+    sta lightState
+    lda tenSecond
+    cmp #0d
+    beq toggleLED3
+    jmp cont
+
+toggleLED3:
+    lda #2d         ;reset 10second counter
+    sta tenSecond
+    lda lightState
+    EOR #1000b      ;LED 3
+    sta lightState
+    jmp cont
+
+cont:
+    dec second
+    lda lightState
+    sta 0a200h      ;input current lightState
+
+    ;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+
+;Variables
+second:
+    dbt 1d
+
+fiveSecond:
+    dbt 10d
+    
+tenSecond:
+    dbt 2d
+
+;light pattern for a200h
+lightState:
+    dbt 00000000b
+
+    end
+
+%/uasm65
+
+    %output,mpversion=".257",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9008D0EB0A9C08D0BB0A9F48D06B0A9018D07B073
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848AD960249018D9602AD9302C900F00D
+      	S117023C034C8202EE9302CE9402AD960249028D9602AD94FA
+      	S117025002C900F0034C8202CE9502A90A8D9402AD9602493F
+      	S1170264048D9602AD9502C900F0034C8202A9028D9502AD0D
+      	S1170278960249088D96024C8202CE9302AD96028D00A26851
+      	S10E028CA868AA68285840010A020074
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 500d     ;every half second
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 F4      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 01      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |    ;Save registers on the stack.
+      0228 08         000042 |    php
+      0229 48         000043 |    pha
+      022A 8A         000044 |    txa
+      022B 48         000045 |    pha
+      022C 98         000046 |    tya
+      022D 48         000047 |    pha
+                      000048 |    
+      022E AD 96 02   000049 |    lda lightState
+      0231 49 01      000050 |    EOR #1b         ;LED 0
+      0233 8D 96 02   000051 |    sta lightState
+      0236 AD 93 02   000052 |    lda second
+      0239 C9 00      000053 |    cmp #0d
+      023B F0 03      000054 |    beq toggleLED1
+      023D 4C 82 02   000055 |    jmp cont
+                      000056 |    
+      0240            000057 |toggleLED1:
+      0240 EE 93 02   000058 |    inc second      ;reset second counter
+      0243 CE 94 02   000059 |    dec fiveSecond
+      0246 AD 96 02   000060 |    lda lightState
+      0249 49 02      000061 |    EOR #10b        ;LED 1
+      024B 8D 96 02   000062 |    sta lightState
+      024E AD 94 02   000063 |    lda fiveSecond
+      0251 C9 00      000064 |    cmp #0d
+      0253 F0 03      000065 |    beq ToggleLED2
+      0255 4C 82 02   000066 |    jmp cont
+                      000067 |
+      0258            000068 |toggleLED2:
+      0258 CE 95 02   000069 |    dec tenSecond
+      025B A9 0A      000070 |    lda #10d        ;reset 5second counter
+      025D 8D 94 02   000071 |    sta fiveSecond
+      0260 AD 96 02   000072 |    lda lightState
+      0263 49 04      000073 |    EOR #100b       ;LED 2
+      0265 8D 96 02   000074 |    sta lightState
+      0268 AD 95 02   000075 |    lda tenSecond
+      026B C9 00      000076 |    cmp #0d
+      026D F0 03      000077 |    beq toggleLED3
+      026F 4C 82 02   000078 |    jmp cont
+                      000079 |
+      0272            000080 |toggleLED3:
+      0272 A9 02      000081 |    lda #2d         ;reset 10second counter
+      0274 8D 95 02   000082 |    sta tenSecond
+      0277 AD 96 02   000083 |    lda lightState
+      027A 49 08      000084 |    EOR #1000b      ;LED 3
+      027C 8D 96 02   000085 |    sta lightState
+      027F 4C 82 02   000086 |    jmp cont
+                      000087 |
+      0282            000088 |cont:
+      0282 CE 93 02   000089 |    dec second
+      0285 AD 96 02   000090 |    lda lightState
+      0288 8D 00 A2   000091 |    sta 0a200h      ;input current lightState
+                      000092 |
+                      000093 |    ;Restore registers from the stack.
+      028B 68         000094 |    pla
+      028C A8         000095 |    tay
+      028D 68         000096 |    pla
+      028E AA         000097 |    tax
+      028F 68         000098 |    pla
+      0290 28         000099 |    plp
+                      000100 |
+      0291 58         000101 |    cli    ; Enable interrupts.
+                      000102 |   
+      0292 40         000103 |    rti    ; Return from interrupt.
+                      000104 |
+                      000105 |;Variables
+      0293            000106 |second:
+      0293 01         000107 |    dbt 1d
+                      000108 |
+      0294            000109 |fiveSecond:
+      0294 0A         000110 |    dbt 10d
+                      000111 |    
+      0295            000112 |tenSecond:
+      0295 02         000113 |    dbt 2d
+                      000114 |
+                      000115 |;light pattern for a200h
+      0296            000116 |lightState:
+      0296 00         000117 |    dbt 00000000b
+                      000118 |
+                      000119 |    end
+      
+      *** Symbol Table ***
+      {TOGGLELED1=576, SECOND=659, T1LH=45063, COUNTDOWN=500, TENSECOND=661, ACR=45067, IER=45070, FIVESECOND=660, IRQVECT=2, MAINLOOP=548, LIGHTSTATE=662, CONT=642, TOGGLELED3=626, TOGGLELED2=600, INTERRUPTHANDLER=552, =0, T1LL=45062}
+.   %/output
+
+3.);done
+%uasm65,title="300Hz tone"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 3d     ;300Hz tone
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+    ;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    lda 0a200h
+    eor #1b      ;toggle bit 0 for speaker
+    sta 0a200h
+
+    ;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+
+Counter:
+    dbt 1d
+
+    end
+
+%/uasm65
+
+    %output,mpversion=".257",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9008D0EB0A9C08D0BB0A9038D06B0A9008D07B065
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848AD00A249018D00A268A868AA682842
+      	S106023C58400122
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 3d     ;300Hz tone
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 03      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 00      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |    ;Save registers on the stack.
+      0228 08         000042 |    php
+      0229 48         000043 |    pha
+      022A 8A         000044 |    txa
+      022B 48         000045 |    pha
+      022C 98         000046 |    tya
+      022D 48         000047 |    pha
+                      000048 |    
+      022E AD 00 A2   000049 |    lda 0a200h
+      0231 49 01      000050 |    eor #1b      ;toggle bit 0 for speaker
+      0233 8D 00 A2   000051 |    sta 0a200h
+                      000052 |
+                      000053 |    ;Restore registers from the stack.
+      0236 68         000054 |    pla
+      0237 A8         000055 |    tay
+      0238 68         000056 |    pla
+      0239 AA         000057 |    tax
+      023A 68         000058 |    pla
+      023B 28         000059 |    plp
+                      000060 |
+      023C 58         000061 |    cli    ; Enable interrupts.
+                      000062 |   
+      023D 40         000063 |    rti    ; Return from interrupt.
+                      000064 |
+      023E            000065 |Counter:
+      023E 01         000066 |    dbt 1d
+                      000067 |
+                      000068 |    end
+      
+      *** Symbol Table ***
+      {T1LH=45063, COUNTDOWN=3, ACR=45067, IER=45070, IRQVECT=2, COUNTER=574, MAINLOOP=548, INTERRUPTHANDLER=552, =0, T1LL=45062}
+.   %/output
+
+4.);done
+%uasm65,title="Octave Notes"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 1d       ;every milisecond
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+    ;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    ldx myX
+    
+    lda secondUp            ;waiting?
+    beq waiting
+    
+    lda Timer               ;quarterUP?
+    beq quarterUpSecond
+    
+    dec Timer               ;keep going, check octaveTimer
+
+    lda Octave,x
+    beq toggleSpeaker
+    dec Octave,x
+    jmp continue
+    
+waiting:
+    lda Timer
+    beq quarterUpWait   ;quarter of wait up
+    dec Timer
+    
+    lda waitUp
+    beq nextOctave      ;doneWaiting?
+    
+    jmp continue
+
+quarterUpWait:
+    lda #250d
+    sta Timer
+    dec waitUp
+    jmp continue
+    
+quarterUpSecond:
+    lda #250d           
+    sta Timer
+    dec secondUp
+    
+    lda Octave,x
+    beq toggleSpeaker
+    dec Octave,x
+    
+    jmp continue
+    
+nextOctave:
+    lda #250d           ;resetTimer
+    sta Timer
+    
+    lda #2d             ;reset WaitTimer
+    sta waitUp
+    lda #4d             ;reset playToneTimer
+    sta secondUp
+    
+    lda resetOctave,x   ;resetOctaveTiming
+    sta Octave,x
+    
+    inx                 ;nextOctave
+    jmp continue
+    
+toggleSpeaker:
+    lda 0a200h
+    eor #11111111b
+    sta 0a200h
+    lda resetOctave,x
+    sta Octave,x
+    
+    cpx #8d
+    bne continue
+    ldx #0d
+    jmp continue
+
+continue:
+    stx myX             ;store x reg value
+    
+    ;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+
+    
+Octave: ;Guitar to Violin Octaves 2-3
+    dbt 12d,11d,10d,9d,8d,7d,6d,5d,4d
+    dbt 0d
+
+resetOctave:
+    dbt 12d,11d,10d,9d,8d,7d,6d,5d,4d
+    dbt 0d
+    
+Timer:
+    dbt 250d    ;quarterSecond
+    
+secondUp:       ;Should be 4 quarterSecond periods
+    dbt 4d
+    
+waitUp:         ;should be 2 quarterSecond Periods
+    dbt 2d
+    
+myX:            ;start index for Octaves
+    dbt 0d
+
+    end
+
+%/uasm65
+
+    %output,mpversion=".257",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9008D0EB0A9C08D0BB0A9018D06B0A9008D07B067
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848AEC902ADC702F013ADC602F029CE6E
+      	S117023CC602BDB202F04DDEB2024CA702ADC602F00BCEC6A9
+      	S117025002ADC802F0214CA702A9FA8DC602CEC8024CA70292
+      	S1170264A9FA8DC602CEC702BDB202F01FDEB2024CA702A943
+      	S1170278FA8DC602A9028DC802A9048DC702BDBC029DB2024E
+      	S117028CE84CA702AD00A249FF8D00A2BDBC029DB202E00803
+      	S11702A0D005A2004CA7028EC90268A868AA682858400C0B20
+      	S11702B40A090807060504000C0B0A09080706050400FA04BB
+      	S10502C802002E
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 1d       ;every milisecond
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 01      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 00      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |    ;Save registers on the stack.
+      0228 08         000042 |    php
+      0229 48         000043 |    pha
+      022A 8A         000044 |    txa
+      022B 48         000045 |    pha
+      022C 98         000046 |    tya
+      022D 48         000047 |    pha
+                      000048 |    
+      022E AE C9 02   000049 |    ldx myX
+                      000050 |    
+      0231 AD C7 02   000051 |    lda secondUp            ;waiting?
+      0234 F0 13      000052 |    beq waiting
+                      000053 |    
+      0236 AD C6 02   000054 |    lda Timer               ;quarterUP?
+      0239 F0 29      000055 |    beq quarterUpSecond
+                      000056 |    
+      023B CE C6 02   000057 |    dec Timer               ;keep going,check octaveTimer
+                      000058 |
+      023E BD B2 02   000059 |    lda Octave,x
+      0241 F0 4D      000060 |    beq toggleSpeaker
+      0243 DE B2 02   000061 |    dec Octave,x
+      0246 4C A7 02   000062 |    jmp continue
+                      000063 |    
+      0249            000064 |waiting:
+      0249 AD C6 02   000065 |    lda Timer
+      024C F0 0B      000066 |    beq quarterUpWait   ;quarter of wait up
+      024E CE C6 02   000067 |    dec Timer
+                      000068 |    
+      0251 AD C8 02   000069 |    lda waitUp
+      0254 F0 21      000070 |    beq nextOctave      ;doneWaiting?
+                      000071 |    
+      0256 4C A7 02   000072 |    jmp continue
+                      000073 |
+      0259            000074 |quarterUpWait:
+      0259 A9 FA      000075 |    lda #250d
+      025B 8D C6 02   000076 |    sta Timer
+      025E CE C8 02   000077 |    dec waitUp
+      0261 4C A7 02   000078 |    jmp continue
+                      000079 |    
+      0264            000080 |quarterUpSecond:
+      0264 A9 FA      000081 |    lda #250d           
+      0266 8D C6 02   000082 |    sta Timer
+      0269 CE C7 02   000083 |    dec secondUp
+                      000084 |    
+      026C BD B2 02   000085 |    lda Octave,x
+      026F F0 1F      000086 |    beq toggleSpeaker
+      0271 DE B2 02   000087 |    dec Octave,x
+                      000088 |    
+      0274 4C A7 02   000089 |    jmp continue
+                      000090 |    
+      0277            000091 |nextOctave:
+      0277 A9 FA      000092 |    lda #250d           ;resetTimer
+      0279 8D C6 02   000093 |    sta Timer
+                      000094 |    
+      027C A9 02      000095 |    lda #2d             ;reset WaitTimer
+      027E 8D C8 02   000096 |    sta waitUp
+      0281 A9 04      000097 |    lda #4d             ;reset playToneTimer
+      0283 8D C7 02   000098 |    sta secondUp
+                      000099 |    
+      0286 BD BC 02   000100 |    lda resetOctave,x   ;resetOctaveTiming
+      0289 9D B2 02   000101 |    sta Octave,x
+                      000102 |    
+      028C E8         000103 |    inx                 ;nextOctave
+      028D 4C A7 02   000104 |    jmp continue
+                      000105 |    
+      0290            000106 |toggleSpeaker:
+      0290 AD 00 A2   000107 |    lda 0a200h
+      0293 49 FF      000108 |    eor #11111111b
+      0295 8D 00 A2   000109 |    sta 0a200h
+      0298 BD BC 02   000110 |    lda resetOctave,x
+      029B 9D B2 02   000111 |    sta Octave,x
+                      000112 |    
+      029E E0 08      000113 |    cpx #8d
+      02A0 D0 05      000114 |    bne continue
+      02A2 A2 00      000115 |    ldx #0d
+      02A4 4C A7 02   000116 |    jmp continue
+                      000117 |
+      02A7            000118 |continue:
+      02A7 8E C9 02   000119 |    stx myX             ;store x reg value
+                      000120 |    
+                      000121 |    ;Restore registers from the stack.
+      02AA 68         000122 |    pla
+      02AB A8         000123 |    tay
+      02AC 68         000124 |    pla
+      02AD AA         000125 |    tax
+      02AE 68         000126 |    pla
+      02AF 28         000127 |    plp
+                      000128 |
+      02B0 58         000129 |    cli    ; Enable interrupts.
+                      000130 |   
+      02B1 40         000131 |    rti    ; Return from interrupt.
+                      000132 |
+                      000133 |    
+      02B2            000134 |Octave: ;Guitar to Violin Octaves 2-3
+      02B2 0C         000135 |    dbt 12d,11d,10d,9d,8d,7d,6d,5d,4d
+      02B3 0B               
+      02B4 0A               
+      02B5 09               
+      02B6 08               
+      02B7 07               
+      02B8 06               
+      02B9 05               
+      02BA 04               
+      02BB 00         000136 |    dbt 0d
+                      000137 |
+      02BC            000138 |resetOctave:
+      02BC 0C         000139 |    dbt 12d,11d,10d,9d,8d,7d,6d,5d,4d
+      02BD 0B               
+      02BE 0A               
+      02BF 09               
+      02C0 08               
+      02C1 07               
+      02C2 06               
+      02C3 05               
+      02C4 04               
+      02C5 00         000140 |    dbt 0d
+                      000141 |    
+      02C6            000142 |Timer:
+      02C6 FA         000143 |    dbt 250d    ;quarterSecond
+                      000144 |    
+      02C7            000145 |secondUp:       ;Should be 4 quarterSecond periods
+      02C7 04         000146 |    dbt 4d
+                      000147 |    
+      02C8            000148 |waitUp:         ;should be 2 quarterSecond Periods
+      02C8 02         000149 |    dbt 2d
+                      000150 |    
+      02C9            000151 |myX:            ;start index for Octaves
+      02C9 00         000152 |    dbt 0d
+                      000153 |
+                      000154 |    end
+      
+      *** Symbol Table ***
+      {MYX=713, ACR=45067, TIMER=710, CONTINUE=679, IER=45070, OCTAVE=690, INTERRUPTHANDLER=552, IRQVECT=2, WAITUP=712, SECONDUP=711, COUNTDOWN=1, RESETOCTAVE=700, MAINLOOP=548, TOGGLESPEAKER=656, WAITING=585, QUARTERUPWAIT=601, NEXTOCTAVE=631, QUARTERUPSECOND=612, T1LL=45062, T1LH=45063, =0}
+.   %/output
+
+5.);done
+%uasm65,title="Beep for switchPresss"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 500d
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+
+;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    lda notBlinking
+    beq curBlinking
+    
+    lda 0a600h
+    eor #111111b
+    cmp #1b
+    beq incCount        ;is switch0 pressed?
+    cmp #10b
+    bne continue
+    
+    dec notBlinking     ;switch1 pressed
+    jmp curBlinking
+    
+incCount:
+    inc switchCount     ;inc count for times pressed
+    jmp continue
+    
+curBlinking:
+    lda 0a200h
+    eor #1b             ;toggleLED
+    sta 0a200h
+    
+    lda toggler         ;has it been 1 blink?
+    beq blinkSet
+    dec toggler
+    
+    lda switchCount
+    bne continue
+    
+    lda #1d             ;make sure toggler is reset
+    sta toggler
+    inc notBlinking
+    jmp continue
+    
+blinkSet:
+    inc toggler         ;1 blink
+    dec switchCount     ;decreaseTimes to blink
+    jmp continue
+
+continue:
+;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+    
+toggler:
+    dbt 1d
+
+notBlinking:
+    dbt 1d
+    
+switchCount:
+    dbt 0d
+
+    end
+
+%/uasm65
+
+    %output,mpversion=".257",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9008D0EB0A9C08D0BB0A9F48D06B0A9018D07B073
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848AD7E02F019AD00A6493FC901F00AE7
+      	S117023CC902D035CE7E024C4C02EE7F024C7502AD00A24928
+      	S1170250018D00A2AD7D02F013CE7D02AD7F02D014A9018DA1
+      	S11702647D02EE7E024C7502EE7D02CE7F024C750268A868DB
+      	S10B0278AA68285840010100A6
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 500d
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 F4      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 01      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |
+                      000042 |;Save registers on the stack.
+      0228 08         000043 |    php
+      0229 48         000044 |    pha
+      022A 8A         000045 |    txa
+      022B 48         000046 |    pha
+      022C 98         000047 |    tya
+      022D 48         000048 |    pha
+                      000049 |    
+      022E AD 7E 02   000050 |    lda notBlinking
+      0231 F0 19      000051 |    beq curBlinking
+                      000052 |    
+      0233 AD 00 A6   000053 |    lda 0a600h
+      0236 49 3F      000054 |    eor #111111b
+      0238 C9 01      000055 |    cmp #1b
+      023A F0 0A      000056 |    beq incCount        ;is switch0 pressed?
+      023C C9 02      000057 |    cmp #10b
+      023E D0 35      000058 |    bne continue
+                      000059 |    
+      0240 CE 7E 02   000060 |    dec notBlinking     ;switch1 pressed
+      0243 4C 4C 02   000061 |    jmp curBlinking
+                      000062 |    
+      0246            000063 |incCount:
+      0246 EE 7F 02   000064 |    inc switchCount     ;inc count for times pressed
+      0249 4C 75 02   000065 |    jmp continue
+                      000066 |    
+      024C            000067 |curBlinking:
+      024C AD 00 A2   000068 |    lda 0a200h
+      024F 49 01      000069 |    eor #1b             ;toggleLED
+      0251 8D 00 A2   000070 |    sta 0a200h
+                      000071 |    
+      0254 AD 7D 02   000072 |    lda toggler         ;has it been 1 blink?
+      0257 F0 13      000073 |    beq blinkSet
+      0259 CE 7D 02   000074 |    dec toggler
+                      000075 |    
+      025C AD 7F 02   000076 |    lda switchCount
+      025F D0 14      000077 |    bne continue
+                      000078 |    
+      0261 A9 01      000079 |    lda #1d             ;make sure toggler is reset
+      0263 8D 7D 02   000080 |    sta toggler
+      0266 EE 7E 02   000081 |    inc notBlinking
+      0269 4C 75 02   000082 |    jmp continue
+                      000083 |    
+      026C            000084 |blinkSet:
+      026C EE 7D 02   000085 |    inc toggler         ;1 blink
+      026F CE 7F 02   000086 |    dec switchCount     ;decreaseTimes to blink
+      0272 4C 75 02   000087 |    jmp continue
+                      000088 |
+      0275            000089 |continue:
+                      000090 |;Restore registers from the stack.
+      0275 68         000091 |    pla
+      0276 A8         000092 |    tay
+      0277 68         000093 |    pla
+      0278 AA         000094 |    tax
+      0279 68         000095 |    pla
+      027A 28         000096 |    plp
+                      000097 |
+      027B 58         000098 |    cli    ; Enable interrupts.
+                      000099 |   
+      027C 40         000100 |    rti    ; Return from interrupt.
+                      000101 |    
+      027D            000102 |toggler:
+      027D 01         000103 |    dbt 1d
+                      000104 |
+      027E            000105 |notBlinking:
+      027E 01         000106 |    dbt 1d
+                      000107 |    
+      027F            000108 |switchCount:
+      027F 00         000109 |    dbt 0d
+                      000110 |
+                      000111 |    end
+      
+      *** Symbol Table ***
+      {SWITCHCOUNT=639, T1LH=45063, COUNTDOWN=500, ACR=45067, IER=45070, NOTBLINKING=638, IRQVECT=2, MAINLOOP=548, BLINKSET=620, CONTINUE=629, TOGGLER=637, CURBLINKING=588, INCCOUNT=582, INTERRUPTHANDLER=552, =0, T1LL=45062}
+.   %/output
+
+6.);done
+%uasm65,title="Organ"
+
+T1LL:  equ B006h
+T1LH:  equ B007h
+IER:   equ B00Eh
+ACR:   equ B00Bh
+
+COUNTDOWN: equ 1d       ;1000Hz tone 1beep per milisecond
+ 
+IRQVect: equ 0002d
+
+    org 0200h
+     
+    lda #0d
+   
+    sta IER             ; Disable all interrupts.
+    lda #11000000b
+    sta ACR             ; Set to T1 free running mode;
+   
+    lda #COUNTDOWN<
+    sta T1LL            ; Low byte of latch.
+    lda #COUNTDOWN>
+    sta T1LH            ; High byte of latch.
+ 
+
+    ; Initialize the interrupt vector.
+    lda #InterruptHandler<
+    sta IRQVect
+    lda #InterruptHandler>
+    sta IRQVect+1d
+   
+    lda #01000000b
+    sta IER        ; Enable all interrupts on the 6522.
+   
+    cli            ; Enable interrupts
+   
+MainLoop:
+    nop
+    jmp MainLoop
+   
+InterruptHandler:
+
+;Save registers on the stack.
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+    
+    lda 0a600h
+    eor #111111b
+    cmp #1b         ;switch1
+    beq tone1
+    cmp #10b        ;switch2
+    beq tone2
+    cmp #100b       ;switch3
+    beq tone3
+    cmp #1000b      ;switch4
+    beq tone4
+    
+    jmp continue    ;no switch press
+    
+tone1:
+    lda timer1
+    beq t1reset     ;freq1 time up?
+    dec timer1
+    jmp continue
+t1reset:            ;playtone1
+    lda timer1Reset
+    sta timer1
+    lda 0a200h
+    eor #1b
+    sta 0a200h
+    jmp continue
+    
+tone2:
+    lda timer2
+    beq t2reset     ;freq2 time up?
+    dec timer2
+    jmp continue
+t2reset:            ;playtone2
+    lda timer2Reset
+    sta timer2
+    lda 0a200h
+    eor #1b
+    sta 0a200h
+    jmp continue
+    
+tone3:
+    lda timer3
+    beq t3reset     ;freq3 time up?
+    dec timer3
+    jmp continue
+t3reset:            ;playtone3
+    lda timer3Reset
+    sta timer3
+    lda 0a200h
+    eor #1b
+    sta 0a200h
+    jmp continue
+    
+tone4:
+    lda timer4
+    beq t4reset         ;freq4 timer up?
+    dec timer4
+    jmp continue
+t4reset:                ;playtone4
+    lda timer4Reset
+    sta timer4
+    lda 0a200h
+    eor #1b
+    sta 0a200h
+    jmp continue
+    
+continue:
+;Restore registers from the stack.
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    cli    ; Enable interrupts.
+   
+    rti    ; Return from interrupt.
+    
+timer1: dbt 15d
+
+timer1Reset: dbt 15d
+
+timer2: dbt 10d
+
+timer2Reset: dbt 10d
+
+timer3: dbt 5d
+
+timer3Reset: dbt 5d 
+
+timer4: dbt 2d
+
+timer4Reset: dbt 2d
+
+    end
+
+%/uasm65
+
+    %output,mpversion=".257",preserve="false"
+      *** Executable Code ***
+      
+      %s19,description="Execute this fold to send program to U6502 monitor.",preserve="false"
+      	S00700005541534DC2
+      	S1170200A9008D0EB0A9C08D0BB0A9018D06B0A9008D07B067
+      	S1170214A9288D0200A9028D0300A9408D0EB058EA4C24024F
+      	S117022808488A489848AD00A6493FC901F00FC902F027C96D
+      	S117023C04F03FC908F0574CB602ADBE02F006CEBE024CB668
+      	S117025002ADBF028DBE02AD00A249018D00A24CB602ADC0A0
+      	S117026402F006CEC0024CB602ADC1028DC002AD00A249019E
+      	S11702788D00A24CB602ADC202F006CEC2024CB602ADC302CC
+      	S117028C8DC202AD00A249018D00A24CB602ADC402F006CE06
+      	S11702A0C4024CB602ADC5028DC402AD00A249018D00A24CA1
+      	S11502B4B60268A868AA682858400F0F0A0A05050202F2
+      	S9030000FC
+      %/s19
+      
+      *** List File ***
+      
+                      000001 |
+      0000            000002 |T1LL:  equ B006h
+      0000            000003 |T1LH:  equ B007h
+      0000            000004 |IER:   equ B00Eh
+      0000            000005 |ACR:   equ B00Bh
+                      000006 |
+      0000            000007 |COUNTDOWN: equ 1d       ;1000Hz tone 1beep per milisecond
+                      000008 | 
+      0000            000009 |IRQVect: equ 0002d
+                      000010 |
+      0200            000011 |    org 0200h
+                      000012 |     
+      0200 A9 00      000013 |    lda #0d
+                      000014 |   
+      0202 8D 0E B0   000015 |    sta IER             ; Disable all interrupts.
+      0205 A9 C0      000016 |    lda #11000000b
+      0207 8D 0B B0   000017 |    sta ACR             ; Set to T1 free running mode;
+                      000018 |   
+      020A A9 01      000019 |    lda #COUNTDOWN<
+      020C 8D 06 B0   000020 |    sta T1LL            ; Low byte of latch.
+      020F A9 00      000021 |    lda #COUNTDOWN>
+      0211 8D 07 B0   000022 |    sta T1LH            ; High byte of latch.
+                      000023 | 
+                      000024 |
+                      000025 |    ; Initialize the interrupt vector.
+      0214 A9 28      000026 |    lda #InterruptHandler<
+      0216 8D 02 00   000027 |    sta IRQVect
+      0219 A9 02      000028 |    lda #InterruptHandler>
+      021B 8D 03 00   000029 |    sta IRQVect+1d
+                      000030 |   
+      021E A9 40      000031 |    lda #01000000b
+      0220 8D 0E B0   000032 |    sta IER        ; Enable all interrupts on the 6522.
+                      000033 |   
+      0223 58         000034 |    cli            ; Enable interrupts
+                      000035 |   
+      0224            000036 |MainLoop:
+      0224 EA         000037 |    nop
+      0225 4C 24 02   000038 |    jmp MainLoop
+                      000039 |   
+      0228            000040 |InterruptHandler:
+                      000041 |
+                      000042 |;Save registers on the stack.
+      0228 08         000043 |    php
+      0229 48         000044 |    pha
+      022A 8A         000045 |    txa
+      022B 48         000046 |    pha
+      022C 98         000047 |    tya
+      022D 48         000048 |    pha
+                      000049 |    
+      022E AD 00 A6   000050 |    lda 0a600h
+      0231 49 3F      000051 |    eor #111111b
+      0233 C9 01      000052 |    cmp #1b         ;switch1
+      0235 F0 0F      000053 |    beq tone1
+      0237 C9 02      000054 |    cmp #10b        ;switch2
+      0239 F0 27      000055 |    beq tone2
+      023B C9 04      000056 |    cmp #100b       ;switch3
+      023D F0 3F      000057 |    beq tone3
+      023F C9 08      000058 |    cmp #1000b      ;switch4
+      0241 F0 57      000059 |    beq tone4
+                      000060 |    
+      0243 4C B6 02   000061 |    jmp continue    ;no switch press
+                      000062 |    
+      0246            000063 |tone1:
+      0246 AD BE 02   000064 |    lda timer1
+      0249 F0 06      000065 |    beq t1reset     ;freq1 time up?
+      024B CE BE 02   000066 |    dec timer1
+      024E 4C B6 02   000067 |    jmp continue
+      0251            000068 |t1reset:            ;playtone1
+      0251 AD BF 02   000069 |    lda timer1Reset
+      0254 8D BE 02   000070 |    sta timer1
+      0257 AD 00 A2   000071 |    lda 0a200h
+      025A 49 01      000072 |    eor #1b
+      025C 8D 00 A2   000073 |    sta 0a200h
+      025F 4C B6 02   000074 |    jmp continue
+                      000075 |    
+      0262            000076 |tone2:
+      0262 AD C0 02   000077 |    lda timer2
+      0265 F0 06      000078 |    beq t2reset     ;freq2 time up?
+      0267 CE C0 02   000079 |    dec timer2
+      026A 4C B6 02   000080 |    jmp continue
+      026D            000081 |t2reset:            ;playtone2
+      026D AD C1 02   000082 |    lda timer2Reset
+      0270 8D C0 02   000083 |    sta timer2
+      0273 AD 00 A2   000084 |    lda 0a200h
+      0276 49 01      000085 |    eor #1b
+      0278 8D 00 A2   000086 |    sta 0a200h
+      027B 4C B6 02   000087 |    jmp continue
+                      000088 |    
+      027E            000089 |tone3:
+      027E AD C2 02   000090 |    lda timer3
+      0281 F0 06      000091 |    beq t3reset     ;freq3 time up?
+      0283 CE C2 02   000092 |    dec timer3
+      0286 4C B6 02   000093 |    jmp continue
+      0289            000094 |t3reset:            ;playtone3
+      0289 AD C3 02   000095 |    lda timer3Reset
+      028C 8D C2 02   000096 |    sta timer3
+      028F AD 00 A2   000097 |    lda 0a200h
+      0292 49 01      000098 |    eor #1b
+      0294 8D 00 A2   000099 |    sta 0a200h
+      0297 4C B6 02   000100 |    jmp continue
+                      000101 |    
+      029A            000102 |tone4:
+      029A AD C4 02   000103 |    lda timer4
+      029D F0 06      000104 |    beq t4reset         ;freq4 timer up?
+      029F CE C4 02   000105 |    dec timer4
+      02A2 4C B6 02   000106 |    jmp continue
+      02A5            000107 |t4reset:                ;playtone4
+      02A5 AD C5 02   000108 |    lda timer4Reset
+      02A8 8D C4 02   000109 |    sta timer4
+      02AB AD 00 A2   000110 |    lda 0a200h
+      02AE 49 01      000111 |    eor #1b
+      02B0 8D 00 A2   000112 |    sta 0a200h
+      02B3 4C B6 02   000113 |    jmp continue
+                      000114 |    
+      02B6            000115 |continue:
+                      000116 |;Restore registers from the stack.
+      02B6 68         000117 |    pla
+      02B7 A8         000118 |    tay
+      02B8 68         000119 |    pla
+      02B9 AA         000120 |    tax
+      02BA 68         000121 |    pla
+      02BB 28         000122 |    plp
+                      000123 |
+      02BC 58         000124 |    cli    ; Enable interrupts.
+                      000125 |   
+      02BD 40         000126 |    rti    ; Return from interrupt.
+                      000127 |    
+      02BE 0F         000128 |timer1: dbt 15d
+                      000129 |
+      02BF 0F         000130 |timer1Reset: dbt 15d
+                      000131 |
+      02C0 0A         000132 |timer2: dbt 10d
+                      000133 |
+      02C1 0A         000134 |timer2Reset: dbt 10d
+                      000135 |
+      02C2 05         000136 |timer3: dbt 5d
+                      000137 |
+      02C3 05         000138 |timer3Reset: dbt 5d 
+                      000139 |
+      02C4 02         000140 |timer4: dbt 2d
+                      000141 |
+      02C5 02         000142 |timer4Reset: dbt 2d
+                      000143 |
+                      000144 |    end
+      
+      *** Symbol Table ***
+      {ACR=45067, T3RESET=649, CONTINUE=694, TONE4=666, IER=45070, TONE3=638, TIMER1RESET=703, INTERRUPTHANDLER=552, TONE2=610, TONE1=582, T4RESET=677, IRQVECT=2, COUNTDOWN=1, TIMER2RESET=705, MAINLOOP=548, TIMER3RESET=707, TIMER4RESET=709, TIMER4=708, TIMER3=706, TIMER2=704, TIMER1=702, T1RESET=593, T1LL=45062, T2RESET=621, T1LH=45063, =0}
+.   %/output
+
